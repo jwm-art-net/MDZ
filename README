@@ -1,0 +1,71 @@
+http://jwm-art.net/mdz/
+
+mdz is a Mandelbrot-Set image generator which can use arbitrary precision
+maths to zoom in as deep as you have patience for.
+
+mdz is a fork from gkII ( http://www.jwm-art.net/gkII ) which in turn
+is a fork of gfract ( http://code.google.com/p/gfract/ ).
+
+mdz has stripped out most of the features from gkII and improves
+performance with multi-threaded rendering, and adds the ability to
+zoom really deep with arbitrary precision math.
+
+----------
+
+command line options
+
+the command line options are specifically for those cases where you
+want to render an image without interacting with the program at all.
+or, the command line options can be used to render a 'final' image,
+and the gui should be thought of as more for exploration (infact for
+the new features coming in 0.0.6 i am considering limiting the image
+size because certain features will require even more memory).
+
+----------
+
+         ***** IF YOU SEE BIG BLOCKY PIXELS *****
+
+BY DEFAULT THE ARBITRARY MATHS ROUTINES ARE TURNED OFF. YOU MUST ENABLE
+THEM IN THE IMAGE->ATTRIBUTES DIALOG. arbitrary maths routines are not
+required until zooming has taken you into a sufficient depth. At this
+stage, the arbitrary maths routines must be manually switched on, but
+you will see when you need them as the images become blocky.
+
+You may specify how much precision to use with the arbitrary maths
+routines. The minimum setting mdz allows is 80 bits. Once you find
+you need the arbitrary maths routines, it's worth increasing it to
+128.
+
+Warning: the arbitrary maths routines are slow in comparison, and the
+deeper you zoom, and the more precision you ask for, the slower the
+calculations will become. You'll need a lot of patience or a very fast
+computer to really need more than 128 bits of precision.
+
+-----------
+
+threading
+
+the default number of rendering threads is 64 which might seem rather
+arbitrary. you can increase or decrease this value by using the --threads
+command line option followed by the number you require. note however mdz
+may decide to use less anyway, depending on the image size. this is my
+first multi-threaded program i have written, and in my tests, the best
+performance was yeilded by a high number of threads such as 256.
+
+
+-----------
+mdz development
+
+mdz will not be able to generate other types of fractals or other colouring
+methods. mdz is focused upon exploration of the Mandelbrot-Set using the
+standard colouring method only with the concept being that the Mandelbrot-Set
+is in fact complex enough to actually simulate other colouring methods should
+the explorer have the patience and knowledge to find them ;-)
+
+
+-----------
+
+colour palettes
+
+mdz can read fractint .map colour palette files and can save them too.
+

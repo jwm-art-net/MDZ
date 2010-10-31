@@ -1,0 +1,11 @@
+Known bugs:
+
+within the mdz gui, the M-set inside colour is
+always drawn as black, but unless anti-aliasing
+or colour-scaling is set, the inside colour in
+the saved PNG image file is as the first indexed
+colour in the colour map.
+
+
+
+

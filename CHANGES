@@ -1,0 +1,226 @@
+mdz-0.0.7
+-------------------------------------------
+
+Compatible with MPFR versions 2.3 to 3.0
+Tested on 64bit Debian Lenny and Gentoo ~amd64.
+
+NEW FEATURES:
+
+* Coordinates system now uses center and
+  size as a location reference point.
+
+* New coordinates dialog shows and allows
+  editing of exact coordinates of image.
+
+* MDZ files now store coordinates as cx, cy,
+  and size and writes xmin, xmax, ymax as
+  comments in the file.
+
+* Transparent handling of old-style MDZ files
+  and new style.
+
+* Ability to load an mdz file without loading
+  the palette data.
+
+* Ability to load only the palette data from
+  an MDZ file without loading the fractal
+  settings.
+
+* MDZ files can now contain comments. To make
+  a comment the line must start with the
+  # character.
+
+* Ability to change number of render threads
+  from within the Attributes dialog.
+
+FIXES:
+
+* File filters added to file choosers making
+  extensions of files more obvious.
+
+* Julia sets now drawn in the middle of the
+  windows (unless repositioned or zoomed of
+  course).
+
+* Independent Julia and Mandelbrot coordinates
+  don't effect each other when zooming.
+
+* Refactoring of settings loading.
+
+* Now defaults to 2 threads instead of 64. While
+  this is slower, it has the benefit of not
+  slowing your entire system down.
+
+NEW SRC FILES:
+
+  coords.h + coords.c  contains the calculations
+  for the coordinates, some unfinished precision
+  stuff, and more calculations for the coordinates
+  system.
+
+  setting.h + setting.c contains a handful of
+  functions for transferring textual data into
+  some other type such as double, long, array index,
+  mpfr_t etc.
+
+  mdzfileio.h mdzfileio.c contains mostly just
+  useful functions for reading MDZ files.
+
+  coords_gui.h + coords_gui.c just the GTK code for
+  creating the coordinates dialog. <whisper>I'm
+  quite pleased with how I did it...</whisper>
+
+-------------------------------------------
+mdz-0.0.6
+
+* locales which use commas for decimal
+  places (as opposed to dots) caused problems
+  for load/save of mdz files. the mdz files
+  are now written and read with the program
+  set to the "C" locale. Once read/write is
+  done, the program goes back to the
+  system locale.
+
+-------------------------------------------
+mdz-0.0.5b ----> another bug fix release
+
+* fixed attributes dialog: when turning on
+  arbitrary precision maths, any change in
+  the precision setting was ignored.
+
+* fixed --render command line option: the
+  image rendered is actually saved again!
+  stupid me (as it was if the image had of
+  been saved, it would likely be missing a
+  few lines, but fixed this too).
+
+-------------------------------------------
+mdz-0.0.5
+
+* fixed: seg fault caused bye rth_ui_quit
+  overwriting RT_RENDERING instead of or-ing
+  it (consequently rendering continued while
+  memory and thread data was freed).
+
+* 1 click zooming no longer disables the
+  zoom out button.
+
+* fixed: loading mdz settings files from
+  within the GUI now sets use of arbitrary
+  precision maths routines properly.
+
+* zooming behaviour modified so zoom boxes
+  are drawn with the mouse pointer central
+  to them, instead of at the top-left corner.
+  1 click zooming no longer uses center lines
+  but a fixed size zoom box.
+
+* modified tooltips for zoom buttons in toolbar.
+  changed "depth" label to "iters".
+
+-------------------------------------------
+mdz-0.0.4
+
+* fixed: zoom boxes and center lines no
+  longer leave any artifacts in the image
+  window during redraw or from expose
+  events.
+
+* new: multi-threading. my first foray into
+  multi-threaded programming. i've tested it
+  extensively it seems to work for me, both
+  on 64bit dual core and 32bit single core
+  machines (x86). almost halves rendering
+  speed on both machines tested compared
+  with mdz-0.0.3.
+
+* new: 1 click super zoom. press the button
+  on the toolbar and just click a point to
+  zoom right the way in on.
+
+* inside points within the M-set are always
+  coloured black.
+
+* *lots* of code changes to accommodate
+  multi-threading.
+
+
+-------------------------------------------
+mdz-0.0.3
+
++ fixed: the buffer length for reading text
+  from the settings file was too small for
+  really deep zooms! (was: 80 now: 4096)
+
++ fixed: colour-interpolate setting was
+  ignored when loading a settings file.
+
++ plethora of command line options
+  to load settings, load palette,
+  generate a random palette, log settings
+  to a file while using the program,
+  image width, height, and aspect ratio,
+  file to render to.
+
++ first iteration is 1 instead of 0.
+
++ duplicate window, and zoom in new window
+  re-implemented and working.
+
++ lots of code changes, rearrangements and
+  additions to implement all of above, too
+  many for me to remember.
+
++ default location set as default location
+  of mandelbrot default in Fractint.
+
++ fixed typo in save settings code - note
+  this breaks old settings files - which
+  are broken by other stuff anyway - but
+  can be edited in your favourite text
+  editor!
+
+-------------------------------------------
+mdz-0.0.2-fixes.patch
+
++ fixed: segfault caused by image_info struct
+  not being initialized because the memset
+  was commented out.
+
++ fixed: memory allocation for the palette
+  filename was 1 byte too small.
+
++ fixed: valid paths for system wide palette
+  files was not free()d.
+
+Thanks to Alexandre Prokoudine for reporting
+a seg-fault which occured on 64bit Ubuntu 9.10
+as a result of the above bugs.
+
++ fixed: compilation against mpfr-2.3. mpfr-2.3
+  lacks mpfr_div_d function - use preprocessor
+  directive for conditional compilation of
+  workaround when using mpfr-2.3 (this only
+  effects the repositioning code, NOT the
+  main fractal iteration loops).
+
+-------------------------------------------
+mdz-0.0.2
+
++ load/save settings (text file format)
++ load/save of colour maps
++ gui enhancements
++ preliminary gui seperation
+
+-------------------------------------------
+mdz-0.0.1
+-----\__ initial release
+
+ripped the guts out of gkII - removed everything
+which distracts for exploration of the standard
+Mandelbrot-Set
+
+added usage of MPFR library.
+
+
+

@@ -1,0 +1,18 @@
+for mdz-0.0.6 i'm planning on implementing the following:
+
+* allow zoom and reposition tools to be switched between without
+  depressing the currently selected tool (ie make it work like
+  any other tool bar).
+
+* options to adjust size of image generated without scaling, and
+  provide option to scale by y instead of always by x.
+
+* size adjustment without scaling should not require the entire
+  window to be recalculated, nor should repositioning. (ie make
+  it possible to render specific parts of the image).
+
+* store which lines have pixels within the inside of the M-set
+  such that when only the iterations are increased, only these
+  lines are recalculated.
+
+* a crop tool, maybe, but it's rather low on my list of priorities.

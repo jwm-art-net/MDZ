@@ -1,0 +1,14 @@
+mdz fractal settings
+settings
+fractal mandelbrot
+depth 15000
+aspect 1.33333333333333325932
+colour-scale 0.18554686500000000526
+colour-interpolate yes
+mpfr no
+precision 80
+xmin -7.4629927328725398137343048e-1
+xmax -7.4629927195981498843439782e-1
+ymax 1.0286709714137420600116978e-1
+palette
+file /usr/share/gnofract4d/maps/blues.map

@@ -1,0 +1,82 @@
+---------------------------------------------------
+mdz-0.0.6
+
+*** LOCALE BUG FIX RELEASE! ***
+
+  + read/write of settings files is now performed
+    with the locale setting set to "C". once
+    read/write is complete, the system locale is
+    restored.
+
+---------------------------------------------------
+mdz-0.0.5b
+
+*** ANOTHER BUG FIX RELEASE! ***
+
+  + the image rendered when using the --render
+    commandline option is actually saved now.
+
+  + changing the precision setting when arbitrary
+    maths is turned on is no longer forgotten.
+
+---------------------------------------------------
+mdz-0.0.5
+
+*** BUG FIX RELEASE ***
+
+  + fixed bug which did not turn on arbitrary maths
+    routines when a settings file required it.
+
+  + fixed segfault caused by render threads not
+    stopping before memory was freed on exit.
+
+  + various minor gui modifications/improvements.
+
+---------------------------------------------------
+mdz-0.0.4
+
+*** NEW MULTI-THREADED RENDERING ***
+
+  + rendering time is almost halved on dual core
+    machines (multi-processor machines untested).
+
+  + rendering performance increase on single core
+    machines too.
+
+  + specify number of threads from command line
+    if required.
+
+  + new single click super-zoom.
+
+  + fixed artifacts caused by zoom box and center
+    lines left during rendering and expose events.
+
+  + toolbar tooltips.
+
+---------------------------------------------------
+mdz-0.0.3
+
+*** NEW COMMAND LINE OPTIONS ***
+
+  + settings logging to file or stdout as you zoom
+
+  + render a settings file to a PNG image from the
+    command line without user interaction.
+
+  + options to specify width, height, aspect ratio,
+    and anti-aliasing settings of the image.
+
+*** BUGFIXES ***
+
+  + fixed error in settings loading code caused by
+    a typo, and floating point values > 80 characters
+    in length.
+
+  + minor modifications bringing the default image
+    inline with the default image of fractint.
+
+  + the duplicate and zoom in new window menu options
+    are now working again.
+
+---------------------------------------------------
+EOF

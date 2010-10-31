@@ -1,0 +1,33 @@
+=================
+mdz Installation
+=================
+
+You need development versions of the following libraries:
+
+ * GTK2
+ * libpng 1.0.3. 1.0.3 has a crucial bug-fix so earlier versions don't work.
+ * libpng requires zlib. 1.1.2 works for me.
+ * pkg-config
+ * mpfr
+ * pthreads
+
+Unless you know what you're doing it is strongly recommended to use
+the development packages provided by your Linux distribution's package
+manager.
+
+Once the library dependacies are satisified:
+
+  cd src
+  make
+  sudo make install
+
+
+______/\___________________________/\_____
+*  DON'T FORGET TO READ THE README FILE! *
+ ------ or atleast skim through it -----
+   _      \____________________/
+   /|
+  /
+ /
+/what's that all about then?
+
