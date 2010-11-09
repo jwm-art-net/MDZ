@@ -10,6 +10,20 @@ Minor bug fix release.
 * Duplicate/Zoom-in-new-window no longer
   dumps the settings to stdout.
 
+* VERSION now set in src/Makefile
+
+* Added dist target to src/Makefile to
+  generate mdz-$(VERSION).tar.bz2 (probably
+  in a non standard manner)
+
+* Added --version commandline option
+
+* Show version in main window title bar,
+  and output to settings file in comment
+
+* Added some strangeness in image_info.c
+  lines 310,311...
+
 mdz-0.0.7
 -------------------------------------------
 

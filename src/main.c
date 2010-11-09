@@ -3,21 +3,23 @@
 #include <unistd.h>
 
 #include "cmdline.h"
-#include "fractal.h"
 #include "externs.h"
+#include "fractal.h"
 #include "image_info.h"
 #include "main.h"
+#include "main_gui.h"
 #include "my_png.h"
 #include "palette.h"
 #include "render.h"
 #include "render_threads.h"
-#include "version.h"
-#include "main_gui.h"
+#include "setting.h"
+
 
 image_info*      img;
 random_palette   rnd_palette;
 function_palette fun_palette;
 char*            program_name = 0;
+
 
 void duplicate(void);
 
@@ -63,7 +65,6 @@ void init_misc(void)
     fun_palette.spread = 1;
 }
 
-#include "setting.h"
 
 int main(int argc, char** argv)
 {

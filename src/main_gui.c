@@ -910,6 +910,9 @@ int gui_init(int* argc, char*** argv, image_info* img_)
     GtkWidget* tmp;
     GtkObject* adj;
 
+    char title[80];
+    snprintf(title, 79, "mdz-%s", VERSION);
+
     if (!gtk_init_check(argc, argv))
     {
         fprintf(stderr, "Failed to initilize GUI!\n");
@@ -936,6 +939,7 @@ int gui_init(int* argc, char*** argv, image_info* img_)
     /* main window */
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
+    gtk_window_set_title(GTK_WINDOW(window), title);
     gtk_widget_realize(window);
 
     /* preview window */

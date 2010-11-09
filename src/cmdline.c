@@ -24,6 +24,7 @@ static struct option longopts[] = {
     {   "render",           HAS_ARG,    0,  'R' },
     {   "anti-alias",       HAS_ARG,    0,  'A' },
     {   "threads",          HAS_ARG,    0,  't' },
+    {   "version",          0,          0,  'V' },
     {   0,                  0,          0,  0   }
 };
 
@@ -41,10 +42,16 @@ void show_usage(char* argvzero)
     printf("    -R, --render [FILE]         just render an image to file\n");
     printf("    -A, --anti-alias [n]        set anti-aliasing factor to n\n");
     printf("    -t, --threads [n]           set number of threads to n.\n");
+    printf("    -V, --version               show version.\n");
+
+    printf("\n");
     printf("NOTE: Not all combinations of width, height, aspect ratio, and\n"
            "      settings file make sense. The settings files only store\n"
-           "      the aspect ratio of an image, not it's dimensions.\n");
-    printf("mdz Mandelbrot Deep Zoom\n\n");
+           "      the aspect ratio of an image, not it's dimensions.\n"
+           "      Author may have forgotten to update version number.\n");
+
+    printf("\n");
+    printf("mdz Mandelbrot Deep Zoom\n");
     printf("(c) James W. Morris 2009-2010 http://jwm-art.net/mdz/\n");
     printf("This software is licensed using the GNU GPLv3\n\n");
 }
@@ -165,7 +172,9 @@ int process_args(int argc, char** argv)
                 return -1;
             }
             break;
-
+        case 'V':
+            printf("mdz-%s\n", VERSION);
+            return -1;
         default:
             show_usage(argv[0]);
             return -1;
