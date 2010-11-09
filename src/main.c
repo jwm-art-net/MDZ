@@ -105,7 +105,7 @@ int main(int argc, char** argv)
             ret = -1;
             goto quit1;
         }
-        else image_info_f_save_all(img, stdout);
+
         if (remove(opts.dumpfile) == -1)
         {
             perror("Can't delete temp file");

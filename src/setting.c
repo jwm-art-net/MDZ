@@ -43,12 +43,8 @@ char* setting_get_str(const char* buf, const char* name)
 
     opt = buf + nlen;
 
-DMSG(buf);
-DMSG(opt);
-
     while (*opt == ' ')
         ++opt;
-DMSG(opt);
 
     olen = strlen(opt);
 

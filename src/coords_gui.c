@@ -278,6 +278,18 @@ void coords_dlg_set(image_info* img, coords_dialog* dl)
     coords_cpy(dl->pcoords, img->pcoords);
     coords_center_to_rect(dl->pcoords);
     _coords_dlg_set(dl);
+
+    gtk_widget_set_sensitive(dl->xmin,  true);
+    gtk_widget_set_sensitive(dl->xmax,  true);
+    gtk_widget_set_sensitive(dl->ymax,  true);
+    gtk_widget_set_sensitive(dl->cx,    true);
+    gtk_widget_set_sensitive(dl->cy,    true);
+    gtk_widget_set_sensitive(dl->size,  true);
+/*
+    gtk_widget_set_sensitive(dl->apply_button,  false);
+    gtk_widget_set_sensitive(dl->ok_button,     false);
+*/
+    gtk_widget_set_sensitive(dl->refresh_button, false);
 }
 
 

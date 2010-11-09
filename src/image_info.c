@@ -206,6 +206,8 @@ void image_info_mpfr_change(image_info * img, mp_prec_t precision)
     precision_change(   img->old_size,      precision   );
     precision_change(   img->u.julia.c_re,  precision   );
     precision_change(   img->u.julia.c_re,  precision   );
+
+    coords_set_precision(   img->pcoords,   precision   );
 }
 
 void image_info_clear_image(image_info* img, gboolean raw, gboolean rgb)
@@ -254,6 +256,8 @@ void image_info_reset_view(image_info* img)
     image_info_set_mpfr(img, FALSE);
 
     coords_reset(img->pcoords);
+
+    img->ui_ref_center = TRUE;
 }
 
 int image_info_save_all(image_info * img, const char * filename)
@@ -303,6 +307,8 @@ int image_info_f_save_all(image_info * img, FILE* fd)
 int image_info_save_settings(image_info * img, FILE* fd)
 {
     char* loc = setlocale(LC_NUMERIC, 0);
+    const char* center = (img->ui_ref_center) ? "" : "#";
+    const char* corner = (img->ui_ref_center) ? "#" : "";
 
     setlocale(LC_NUMERIC, "C");
 
@@ -316,18 +322,18 @@ int image_info_save_settings(image_info * img, FILE* fd)
     fprintf(fd, "mpfr %s\n", (img->using_mpfr) ? "yes" : "no");
     fprintf(fd, "precision %d\n", (unsigned int)img->precision);
 
-    fprintf(fd, "cx ");
+    fprintf(fd, "%scx ", center);
     mpfr_out_str (fd, 10, 0, img->pcoords->cx, GMP_RNDN);
-    fprintf(fd, "\ncy ");
+    fprintf(fd, "\n%scy ", center);
     mpfr_out_str (fd, 10, 0, img->pcoords->cy, GMP_RNDN);
-    fprintf(fd, "\nsize ");
+    fprintf(fd, "\n%ssize ", center);
     mpfr_out_str (fd, 10, 0, *img->pcoords->size, GMP_RNDN);
 
-    fprintf(fd, "\n#xmin ");
+    fprintf(fd, "\n%sxmin ", corner);
     mpfr_out_str (fd, 10, 0, img->xmin, GMP_RNDN);
-    fprintf(fd, "\n#xmax ");
+    fprintf(fd, "\n%sxmax ", corner);
     mpfr_out_str (fd, 10, 0, img->xmax, GMP_RNDN);
-    fprintf(fd, "\n#ymax ");
+    fprintf(fd, "\n%symax ", corner);
     mpfr_out_str (fd, 10, 0, img->ymax, GMP_RNDN);
 
     if (img->fr_type == JULIA)
@@ -452,7 +458,9 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
         goto fail;
     }
 
-    if (coord_type == 0)
+    img->ui_ref_center = (coord_type == 0) ? true : false;
+
+    if (img->ui_ref_center)
     {   /* cx, cy, size */
         if (!setting_get_mpfr_t(mf->line, "cx", cx)) {
             mdzfile_err(mf, "Error in cx setting");
@@ -512,7 +520,7 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
     coords_set_precision(img->pcoords, precision);
     image_info_mpfr_change(img, precision);
 
-    if (coord_type == 0)
+    if (img->ui_ref_center)
     {
         coords_to(img->pcoords, cx, cy);
         coords_size(img->pcoords, size);

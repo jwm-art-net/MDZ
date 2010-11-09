@@ -1,3 +1,15 @@
+mdz-0.0.8
+-------------------------------------------
+
+Minor bug fix release.
+
+* Bug fix for coordinates precision means
+  coordinates precision are now updated
+  when precision changed.
+
+* Duplicate/Zoom-in-new-window no longer
+  dumps the settings to stdout.
+
 mdz-0.0.7
 -------------------------------------------
 

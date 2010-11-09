@@ -117,6 +117,8 @@ typedef struct image_info
 
     int lines_drawn;
 
+    bool ui_ref_center; /* UI uses center as location reference point */
+
 } image_info;
 
 image_info * image_info_create(fractal_type fr);
