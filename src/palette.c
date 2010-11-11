@@ -1,14 +1,17 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include "externs.h"
+
 #include "palette.h"
+#include "main_gui.h"
 
 #define BUF_SIZE 256
 
 #define DEFAULT_PALETTE "default.map"
 
+guint32* palette = NULL;
 
+int pal_offset = 0;
 int pal_indexes = 256;
 
 
@@ -366,31 +369,25 @@ void palette_apply_func(function_palette* funpal)
 
 void palette_rotate_backward(void)
 {
-    int i, max;
-    guint32 temp;
+    --pal_offset;
 
-    reset_filename();
-
-    max = pal_indexes-1;
-    temp = palette[0];
-    for (i=0; i < max; i++)
-        palette[i] = palette[i+1];
-    palette[max] = temp;
+    if (pal_offset < 0)
+        pal_offset = pal_indexes - 1;
 }
 
 
 void palette_rotate_forward(void)
 {
-    int i, max;
-    guint32 temp;
+    ++pal_offset;
 
-    reset_filename();
+    if (pal_offset == pal_indexes)
+        pal_offset = 0;
+}
 
-    max = pal_indexes-1;
-    temp = palette[max];
-    for (i=max; i > 0; i--)
-        palette[i] = palette[i-1];
-    palette[0] = temp;
+
+void palette_shift(int offset)
+{
+    pal_offset = (pal_indexes + offset) % pal_indexes;
 }
 
 
@@ -412,26 +409,32 @@ void palette_apply(image_info* img, int x0, int y0, int width, int height)
     guint32* rgb_data;
     int* raw_data;
     double sc = img->colour_scale;
-    double val;
 
     if (img->palette_ip)
     {
-
-        PAL_IP_RGB_INIT
-
         for (y = y0; y < y0 + height; y++)
         {
             rgb_data = &img->rgb_data[y * width];
             raw_data = &img->raw_data[y * width];
-            for (x = x0; x < x0 + width; x++, ++rgb_data, ++ raw_data)
+            for (x = x0; x < x0 + width; x++, ++rgb_data, ++raw_data)
             {
                 if (!*raw_data)
                     *rgb_data = 0;
                 else
                 {
-                    val = *raw_data * sc;
+                    /** FIXME: optimize this */
+                    double ip_val = *raw_data * sc + pal_offset;
+                    int ip_cval = ceil( ip_val );
+                    double ip_diff = ip_cval - ip_val;
+                    double ip_rdiff = 1.0 - ip_diff;
+                    int ip_ind1 = (int)floor(ip_val) % (pal_indexes - 1);
+                    int ip_ind2 = ip_cval % (pal_indexes - 1);
+                    guint32 ip_c1 = palette[ip_ind1];
+                    guint32 ip_c2 = palette[ip_ind2];
 
-                    PAL_IP_RGB( val )
+ guint8 ip_r = (guint8)(ip_diff * RED(  ip_c1) + ip_rdiff * RED(  ip_c2));
+ guint8 ip_g = (guint8)(ip_diff * GREEN(ip_c1) + ip_rdiff * GREEN(ip_c2));
+ guint8 ip_b = (guint8)(ip_diff * BLUE( ip_c1) + ip_rdiff * BLUE( ip_c2));
 
                     *rgb_data = RGB(ip_r, ip_g, ip_b);
                 }
@@ -450,7 +453,7 @@ void palette_apply(image_info* img, int x0, int y0, int width, int height)
                     *rgb_data = 0;
                 else
                 {
-                    val = *raw_data * sc;
+                    double val = *raw_data * sc + pal_offset;
                     *rgb_data =
                         palette[(guint32)val % (pal_indexes - 1)];
                 }
@@ -462,6 +465,9 @@ void palette_apply(image_info* img, int x0, int y0, int width, int height)
 
 guint32 get_pixel_colour(double val, gboolean palette_ip)
 {
+    if (val)
+        val += pal_offset;
+
     if (palette_ip)
     {
         double cval,diff,rdiff;

@@ -5,7 +5,6 @@
 #include <gtk/gtk.h>
 #include <stdbool.h>
 
-#include "externs.h"
 #include "palette.h"
 #include "my_png.h"
 #include "main_gui.h"
@@ -172,8 +171,8 @@ void do_png_save(image_info* img)
                         GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
                         NULL);
 
-    file_chooser_add_filter(dialog, "PNG files", "*.png");
-    file_chooser_add_filter(dialog, "All files", "*");
+    gui_file_chooser_add_filter(dialog, "PNG files", "*.png");
+    gui_file_chooser_add_filter(dialog, "All files", "*");
 
     gtk_file_chooser_set_do_overwrite_confirmation (
                         GTK_FILE_CHOOSER (dialog), TRUE);

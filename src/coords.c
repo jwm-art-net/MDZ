@@ -166,6 +166,13 @@ int coords_calculate_precision(coords* c)
 
     c->recommend = p;
 
+    mpfr_clear(tmp);
+    mpfr_clear(bail);
+    mpfr_clear(px_size);
+    mpfr_clear(precision);
+
+    mpfr_free_cache(); /* <-- keep valgrind happy over mpfr_log2 */
+
     return c->recommend;
 }
 
@@ -344,6 +351,9 @@ void coords_center_to(coords* c, int px, int py)
 
     mpfr_set(   c->cx,      cx,     GMP_RNDN);
     mpfr_set(   c->cy,      cy,     GMP_RNDN);
+
+    mpfr_clear(cx);
+    mpfr_clear(cy);
 }
 
 
@@ -389,6 +399,7 @@ void coords_pixel_to_coord(coords* c, mpfr_t x, mpfr_t y)
 {
     mpfr_t tmp;
     mpfr_t tmp2;
+
     mpfr_init2(tmp,  mpfr_get_prec(x));
     mpfr_init2(tmp2, mpfr_get_prec(x));
 
@@ -414,10 +425,12 @@ void coords_pixel_to_coord(coords* c, mpfr_t x, mpfr_t y)
 void precision_change(mpfr_t x, mp_prec_t p)
 {
     mpfr_t tmp;
+
     mpfr_init2(tmp, p);
     mpfr_set(tmp,   x,      GMP_RNDN);
     mpfr_set_prec(  x,      p);
     mpfr_set(       x,      tmp,    GMP_RNDN);
+
     mpfr_clear(tmp);
 }
 
@@ -432,4 +445,5 @@ static void coords_mpfr_clear(coords* c)
     mpfr_clear(c->height);
     mpfr_clear(c->cx);
     mpfr_clear(c->cy);
+    mpfr_clear(c->_size);
 }

@@ -1,7 +1,6 @@
 #include "image_info.h"
 
 #include "debug.h"
-#include "externs.h"
 #include "palette.h"
 #include "render_threads.h"
 #include "setting.h"
@@ -18,9 +17,8 @@
 static const char* file_header = "mdz fractal settings";
 
 const char* fractal_str[] = { "mandelbrot", "julia", 0 };
-
-const char* coords_str[] = { "cx", "xmin", 0 };
-
+const char* coords_str[] =  { "cx", "xmin", 0 };
+const char* paloff_str =  "palette-offset";
 
 image_info * image_info_create(fractal_type fr)
 {
@@ -82,6 +80,8 @@ void image_info_destroy(image_info* img)
 
     g_free(img->rgb_data);
     g_free(img->raw_data);
+
+    coords_free(img->pcoords);
 }
 
 void image_info_set(image_info* img, int w, int h, int aa_factor)
@@ -349,6 +349,8 @@ int image_info_save_settings(image_info * img, FILE* fd)
 
     fprintf(fd, "\n");
 
+    fprintf(fd, "palette-offset %d\n", pal_offset);
+
     setlocale(LC_NUMERIC, loc);
 
     return 1;
@@ -357,7 +359,6 @@ int image_info_save_settings(image_info * img, FILE* fd)
 #ifdef WITH_TMZ_CMDLINE
 void image_tmz_save_settings(image_info * img, FILE* fd)
 {
-    mpfr_t wid, hei, cx, cy;
     double size;
     int  digits, grid;
     char format[20];
@@ -365,45 +366,26 @@ void image_tmz_save_settings(image_info * img, FILE* fd)
 
     setlocale(LC_NUMERIC, "C");
 
-    mpfr_init2(wid, img->precision); mpfr_init2(hei, img->precision);
-    mpfr_init2(cx, img->precision);  mpfr_init2(cy, img->precision);
-
-    /* Calculate width and height */
-    mpfr_sub(wid, img->xmax, img->xmin, GMP_RNDN);
-    mpfr_div_d(hei, wid, img->aspect, GMP_RNDN);
-
-    /* cx is average of xmin and xmax */
-    mpfr_add(cx, img->xmax, img->xmin, GMP_RNDN);
-    mpfr_div_ui(cx, cx, 2, GMP_RNDN);
-
-
-    /* calculate ymin */
-    mpfr_sub(cy, img->ymax, hei, GMP_RNDN);
-    /* cy is average of ymin and ymax */
-    mpfr_add(cy, cy, img->ymax, GMP_RNDN);
-    mpfr_div_ui(cy, cy, 2, GMP_RNDN);
+    size = mpfr_get_d(*img->pcoords->size, GMP_RNDN);
 
     /* Calculate size */
-    if (mpfr_cmp(wid, hei) > 0) {
+    if (mpfr_cmp(img->pcoords->width, img->pcoords->height) > 0) {
         /* width is greater */
-        size = mpfr_get_d(wid, GMP_RNDN);
         grid = img->real_width;
     } else {
         /* height is greater */
-        size = mpfr_get_d(hei, GMP_RNDN);
         grid = img->real_height;
     }
+
     digits = ((int) log10(4.0 / size)) + 4;
 
     /* Output */
     sprintf(format, "%%%d.%dRf", digits, digits-2);
     fprintf(fd, "TMZ command line:\n  ./tc ");
-    mpfr_fprintf(fd, format, cx);
+    mpfr_fprintf(fd, format, img->pcoords->cx);
     fprintf(fd, " ");
-    mpfr_fprintf(fd, format, cy);
+    mpfr_fprintf(fd, format, img->pcoords->cy);
     fprintf(fd, " %6.4e -nmax %d -grid %d\n", size, img->depth, grid);
-
-    mpfr_clear(wid); mpfr_clear(hei); mpfr_clear(cx); mpfr_clear(cy);
 
     setlocale(LC_NUMERIC, loc);
 }
@@ -421,6 +403,7 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
     int colip = 0;
     int coord_type = 0;
     int ret = 0;
+    long paloff;
 
     mpfr_t cx, cy, size, xmin, xmax, ymax, j_re, j_im;
 
@@ -508,6 +491,19 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
             goto fail;
         }
     }
+
+    if ((mdzfile_test_for_name(mf, paloff_str)))
+    {
+        if (!setting_get_long(mf->line, paloff_str, &paloff, 0, 255))
+        {
+            mdzfile_err(mf, "Error in palette offset setting");
+            goto fail;
+        }
+
+        pal_offset = (int)paloff;
+    }
+    else
+        pal_offset = 0;
 
     if (!(w = img->user_width))
         w = DEFAULT_WIDTH;

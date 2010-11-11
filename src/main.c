@@ -3,7 +3,6 @@
 #include <unistd.h>
 
 #include "cmdline.h"
-#include "externs.h"
 #include "fractal.h"
 #include "image_info.h"
 #include "main.h"

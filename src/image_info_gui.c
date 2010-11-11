@@ -289,7 +289,7 @@ void image_dlg_update_recommended_precision(image_info_dialog* dl,
                                             image_info* img)
 {
     char str[MAX_DP];
-    sprintf(str, "Precision (bits):\nRecommended:%ld",
+    sprintf(str, "Precision (bits):\nScant minimum:%ld",
                         (long)img->pcoords->recommend);
     gtk_label_set_text(GTK_LABEL(dl->plabel), str);
     mpfr_update(0, dl);
@@ -403,8 +403,8 @@ void do_image_info_save_dialog(image_info* img)
     gtk_file_chooser_set_do_overwrite_confirmation (
                         GTK_FILE_CHOOSER (dialog), TRUE);
 
-    file_chooser_add_filter(dialog, "MDZ files", "*.mdz");
-    file_chooser_add_filter(dialog, "All files", "*");
+    gui_file_chooser_add_filter(dialog, "MDZ files", "*.mdz");
+    gui_file_chooser_add_filter(dialog, "All files", "*");
 
     if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
     {
@@ -479,8 +479,8 @@ int do_image_info_load_dialog(image_info* img)
     gtk_widget_show(frame);
     gtk_widget_show(hbox);
 
-    file_chooser_add_filter(dl, "MDZ files", "*.mdz");
-    file_chooser_add_filter(dl, "All files", "*");
+    gui_file_chooser_add_filter(dl, "MDZ files", "*.mdz");
+    gui_file_chooser_add_filter(dl, "All files", "*");
 
     gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(dl), frame);
 

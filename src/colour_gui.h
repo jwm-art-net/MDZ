@@ -7,16 +7,14 @@
 
 typedef struct
 {
-    GtkWidget* dialog;
-
+    GtkWidget* box;
     GtkWidget* scale;
-    GtkWidget* scale_label;
     GtkWidget* palette_ip;
 
 } colour_dialog;
 
-void colour_dlg_new(colour_dialog** ptr, image_info* img);
+colour_dialog*  colour_dlg_new(image_info* img);
+void            colour_dlg_free(colour_dialog*);
 
-void colour_dlg_set(image_info* img, colour_dialog* dl);
-
+void            colour_dlg_set(image_info* img, colour_dialog* dl);
 #endif

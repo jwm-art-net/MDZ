@@ -24,6 +24,7 @@ struct mdzfile
     char* line;
     bool write;
     bool eof;
+    char* test;
 };
 
 
@@ -51,5 +52,7 @@ bool    mdzfile_get_double( mdzfile*,  const char* name,
 bool    mdzfile_get_mpfr_t( mdzfile*,  const char* name, mpfr_t val);
 
 int     mdzfile_get_name_index( mdzfile*, const char** names);
+
+bool    mdzfile_test_for_name(  mdzfile*, const char* str);
 
 #endif

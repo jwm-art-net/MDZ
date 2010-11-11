@@ -12,8 +12,5 @@ extern image_info*      img;
 
 void duplicate(void);
 
-gint do_palette_rotation(gpointer dir);
-void do_palette_randomize(random_palette* rnd_pal);
-void do_palette_function(function_palette* fun_pal);
 
 #endif /* __MAIN_H */

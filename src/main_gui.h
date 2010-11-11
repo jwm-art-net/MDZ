@@ -5,6 +5,7 @@
 
 #include "coords_gui.h"
 #include "image_info.h"
+#include "palette_gui.h"
 
 #define MIN_WINDOW_WIDTH    320
 
@@ -52,7 +53,8 @@ extern image_info*  j_pre;
 extern status_info  stat;
 extern GtkWidget*   drawing_area;
 extern GtkWidget*   window;
-extern coords_dialog* coords_dlg;
+extern coords_dialog*       coords_dlg;
+extern palette_gui*  palgui;
 
 
 int gui_init(int* argc, char*** argv, image_info* img);
@@ -81,5 +83,10 @@ void gui_sensitive_reposition_button(gboolean t);
 void gui_draw_center_lines(int draw_cl);
 
 GtkWidget* gui_create_pixmap(GtkWidget* widget, char** xpm_data);
+
+gint do_palette_rotation(gpointer dir);
+void do_palette_randomize(random_palette* rnd_pal);
+void do_palette_function(function_palette* fun_pal);
+
 
 #endif

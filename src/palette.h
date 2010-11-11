@@ -21,34 +21,10 @@
 #   error Your machine has an unsupported byte order. Please send patch :)
 #endif
 
-#define PAL_IP_RGB_INIT \
-    double ip_cval;     \
-    double ip_diff;     \
-    double ip_rdiff;    \
-    int ip_ind1;        \
-    int ip_ind2;        \
-    guint32 ip_c1;      \
-    guint32 ip_c2;      \
-    guint8 ip_r;        \
-    guint8 ip_g;        \
-    guint8 ip_b;
 
-#define PAL_IP_RGB( ip_val )                                            \
-    /** FIXME: optimize this */                                         \
-    ip_cval = ceil( ip_val );                                           \
-    ip_diff = ip_cval - ip_val;                                         \
-    ip_rdiff = 1.0 - ip_diff;                                           \
-    ip_ind1 = ((guint32)floor( ip_val )) % (pal_indexes-1);             \
-    ip_ind2 = (guint32)ip_cval % (pal_indexes-1);                       \
-    ip_c1 = palette[ip_ind1];                                           \
-    ip_c2 = palette[ip_ind2];                                           \
-    ip_r = (guint8)(ip_diff * RED(  ip_c1) + ip_rdiff * RED(  ip_c2));  \
-    ip_g = (guint8)(ip_diff * GREEN(ip_c1) + ip_rdiff * GREEN(ip_c2));  \
-    ip_b = (guint8)(ip_diff * BLUE( ip_c1) + ip_rdiff * BLUE( ip_c2));  \
-    /* results in ip_r, ip_g, ip_b */
-
+extern int pal_offset;
 extern int pal_indexes;
-
+extern guint32* palette;
 
 int palette_init(void);
 
@@ -71,6 +47,8 @@ void palette_rotate_forward(void);
 void palette_randomize(random_palette* rndpal);
 
 void palette_apply_func(function_palette* funpal);
+
+void palette_shift(int offset);
 
 guint32 get_pixel_colour(double raw_scaled, gboolean palette_ip);
 

@@ -1,5 +1,46 @@
-mdz-0.0.8
 -------------------------------------------
+mdz-0.0.9
+
+
+NEW FEATURES:
+
+* Random palette, Palette functions, colour
+  cycling, and colour scaling dialogs combined into
+  a single notebook dialog.
+
+* New palette notebook dialog displays all colours
+  in palette as a horizontal strip.
+
+* Palette display is updated as palette is edited
+  and/or cycled.
+
+* Point and click sliding of colour palette with
+  image update.
+
+
+CHANGES:
+
+* Removed externs.h and globals.c (which only
+  declared and defined the variable palette).
+
+* Changed 'recommended' precision label in
+  attributes dialog to 'scant minimum' as this
+  better reflects what the value is (or seems to
+  be in my opinion).
+
+
+FIXES:
+
+* Fixed various memory leaks related to coordinates
+  calculation.
+
+* Reams of cut-and-pasted code in the construction
+  of the palette dialogs has been replaced with generic
+  functions.
+
+
+-------------------------------------------
+mdz-0.0.8
 
 Minor bug fix release.
 
@@ -24,8 +65,8 @@ Minor bug fix release.
 * Added some strangeness in image_info.c
   lines 310,311...
 
-mdz-0.0.7
 -------------------------------------------
+mdz-0.0.7
 
 Compatible with MPFR versions 2.3 to 3.0
 Tested on 64bit Debian Lenny and Gentoo ~amd64.

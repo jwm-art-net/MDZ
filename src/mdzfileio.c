@@ -42,8 +42,17 @@ bool mdzfile_read(mdzfile* mf)
 
     do
     {
-        if (!fgets(mf->buf, FBUFLEN, mf->f))
-            return !(mf->eof = true);
+        if (mf->test)
+        {
+            strncpy(mf->buf, mf->test, FBUFLEN);
+            free(mf->test);
+            mf->test = 0;
+        }
+        else
+        {
+            if (!fgets(mf->buf, FBUFLEN, mf->f))
+                return !(mf->eof = true);
+        }
 
         if (mf->line)
             free(mf->line);
@@ -54,6 +63,21 @@ bool mdzfile_read(mdzfile* mf)
     } while (mf->line[0] == '#');
 
     return true;
+}
+
+
+bool mdzfile_test_for_name(mdzfile* mf, const char* str)
+{
+    if (!mdzfile_read(mf))
+        return false;
+
+    mf->test = malloc(strlen(mf->line) + 1);
+    strcpy(mf->test, mf->line);
+
+    if (strcmp(mf->test, str)== 0)
+        return true;
+
+    return false;
 }
 
 
@@ -120,6 +144,7 @@ mdzfile* mdzfile_read_open(const char* filename)
     mf->write = false;
     mf->eof = false;
     mf->line = 0;
+    mf->test = 0;
 
     if (!mdzfile_read(mf))
         return 0;

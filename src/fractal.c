@@ -1,5 +1,4 @@
 #include "fractal.h"
-#include "externs.h"
 #include "render_threads.h"
 
 int fractal_calculate_line(image_info* img, int line)

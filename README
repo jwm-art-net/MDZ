@@ -32,14 +32,20 @@ stage, the arbitrary maths routines must be manually switched on, but
 you will see when you need them as the images become blocky.
 
 You may specify how much precision to use with the arbitrary maths
-routines. The minimum setting mdz allows is 80 bits. Once you find
-you need the arbitrary maths routines, it's worth increasing it to
-128.
+routines. The minimum setting mdz allows was 80 bits but is now 2 bits
+for reasons of fullness. Next to the precision setting is a label
+telling you the 'scant minimum' number of bits required to render any
+image. The scant minimum value is a precision which will render the
+image to a barely acceptable state.
 
 Warning: the arbitrary maths routines are slow in comparison, and the
 deeper you zoom, and the more precision you ask for, the slower the
-calculations will become. You'll need a lot of patience or a very fast
-computer to really need more than 128 bits of precision.
+calculations will become.
+
+Reduce the image size down to 240 x 120 once you require arbitary
+precision maths. Once you've found an image, save the settings and
+use the command line to render the image at higher resolution.
+
 
 -----------
 
@@ -67,5 +73,7 @@ the explorer have the patience and knowledge to find them ;-)
 
 colour palettes
 
-mdz can read fractint .map colour palette files and can save them too.
+mdz can read fractint .map colour palette files and can save them too. It is
+also possible to read the palette section from within an MDZ settings file
+without loading the settings (and vice-versa).
 

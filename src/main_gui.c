@@ -14,9 +14,6 @@
 #include "main.h"
 #include "misc_gui.h"
 #include "my_png.h"
-#include "pal_fun_dlg.h"
-#include "pal_rnd_dlg.h"
-#include "pal_rot_dlg.h"
 #include "render.h"
 #include "render_threads.h"
 #include "reposition.h"
@@ -36,6 +33,7 @@ image_info* j_pre =         NULL;
 GtkWidget* drawing_area =   NULL;
 GtkWidget* window =         NULL;
 coords_dialog* coords_dlg = NULL;
+palette_gui*  palgui =      NULL;
 
 
 static int gui_idle_draw_id;
@@ -50,10 +48,7 @@ static GtkWidget* zoom_new_win =            NULL;
     GtkWidget* menu_bar;
 
 static image_info_dialog*   img_info_dlg =  NULL;
-static colour_dialog *      colour_dlg =    NULL;
-static palette_rot_dialog*  pal_rot_dlg =   NULL;
-static palette_rnd_dialog*  pal_rnd_dlg =   NULL;
-static palette_fun_dialog*  pal_fun_dlg =   NULL;
+
 
 static gint idle_draw_callback(image_info* img);
 
@@ -85,16 +80,12 @@ static gint child_reaper(gpointer nothing);
 */
 static void switch_fractal_type(void);
 
-static void do_colour_dialog(void);
+
 static void do_coords_dialog(void);
 static void do_reset_zoom(void);
 static void toggle_zoom_new_win(GtkWidget* widget);
 
-/* palette cycling */
-static void do_pal_rot_dialog(void);
-static void do_pal_rnd_dialog(void);
-static void do_pal_fun_dialog(void);
-
+static void do_pal_edit_dialog(void);
 
 
 void gui_sensitive_switch_menu(gboolean t)
@@ -120,11 +111,12 @@ void load_settings_cmd(void)
         else
             gtk_widget_set_size_request(drawing_area,
                                 img->user_width, img->user_height);
-        if (colour_dlg)
-            colour_dlg_set(img, colour_dlg);
 
         if (img_info_dlg)
             image_info_dlg_set(img, img_info_dlg);
+
+        if (palgui)
+            palette_gui_update(palgui, img);
 
         gui_start_rendering(img);
     }
@@ -198,18 +190,25 @@ void redraw_image(image_info* img)
                           img->user_width * sizeof(guint32));
 }
 
-gint do_palette_rotation(gpointer dir)
+gint do_palette_rotation(gpointer _dir)
 {
-    gboolean forward = *((gboolean*)dir);
-    if (forward)
+    int dir = *((int*)_dir);
+
+    if (dir > 0)
         palette_rotate_forward();
-    else
+    else if (dir < 0)
         palette_rotate_backward();
+
     if (img->aa_factor == 1)
         palette_apply(img, 0, 0, img->user_width, img->user_height);
     else
         do_anti_aliasing(img, 0, 0, img->user_width, img->user_height);
+
     redraw_image(img);
+
+    if (dir)
+        palette_gui_rot_update(palgui);
+
     return TRUE;
 }
 
@@ -237,21 +236,29 @@ void palette_load_cmd(void)
         ++n;
     }
 
-    file_chooser_add_filter(dialog, "MAP files", "*.map");
-    file_chooser_add_filter(dialog, "All files", "*");
+    gui_file_chooser_add_filter(dialog, "MAP files", "*.map");
+    gui_file_chooser_add_filter(dialog, "All files", "*");
 
     gint dlg_resp;
-    do {
+
+    do
+    {
         dlg_resp = gtk_dialog_run(GTK_DIALOG(dialog));
+
         if ( dlg_resp == GTK_RESPONSE_ACCEPT
           || dlg_resp == GTK_RESPONSE_APPLY)
         {
             char *filename;
+
             filename = gtk_file_chooser_get_filename(
                                     GTK_FILE_CHOOSER(dialog));
+
             if (palette_load(filename) == FALSE)
+            {
                 fprintf(stderr, "Invalid palette file %s\n", filename);
-            else {
+            }
+            else
+            {
                 if (img->aa_factor == 1)
                     palette_apply(img, 0, 0,    img->user_width,
                                                 img->user_height);
@@ -259,10 +266,15 @@ void palette_load_cmd(void)
                     do_anti_aliasing(img, 0, 0, img->user_width, 
                                                 img->user_height);
                 redraw_image(img);
+
+                if (palgui)
+                    palette_gui_update(palgui, img);
             }
             g_free(filename);
         }
+
     } while (dlg_resp == GTK_RESPONSE_APPLY);
+
     gtk_widget_destroy (dialog);
 }
 
@@ -278,8 +290,8 @@ void palette_save_cmd(void)
     gtk_file_chooser_set_do_overwrite_confirmation (
                         GTK_FILE_CHOOSER (dialog), TRUE);
 
-    file_chooser_add_filter(dialog, "MAP files", "*.map");
-    file_chooser_add_filter(dialog, "All files", "*");
+    gui_file_chooser_add_filter(dialog, "MAP files", "*.map");
+    gui_file_chooser_add_filter(dialog, "All files", "*");
 
     if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
     {
@@ -349,14 +361,6 @@ void do_image_info_dialog(void)
                        img_info_dlg);
 }
 
-void do_colour_dialog(void)
-{
-    if (colour_dlg)
-        return;
-
-    colour_dlg_new(&colour_dlg, img);
-}
-
 void do_coords_dialog(void)
 {
     if (coords_dlg)
@@ -391,25 +395,12 @@ static void do_reset_zoom(void)
     }
 }
 
-void do_pal_rot_dialog(void)
-{
-    if (pal_rot_dlg)
-        return;
-    palette_rot_dlg_new(&pal_rot_dlg, img);
-}
 
-void do_pal_rnd_dialog(void)
+void do_pal_edit_dialog(void)
 {
-    if (pal_rnd_dlg)
+    if (palgui)
         return;
-    palette_rnd_dlg_new(&pal_rnd_dlg, img);
-}
-
-void do_pal_fun_dialog(void)
-{
-    if (pal_fun_dlg)
-        return;
-    palette_fun_dlg_new(&pal_fun_dlg, &fun_palette);
+    palette_gui_new(&palgui, img);
 }
 
 /*  commenting this out until I figure out what it's supposed to do
@@ -480,7 +471,6 @@ void create_menus(GtkWidget* vbox)
     menu_add(menu, "Save as PNG", save_png_cmd);
     menu_add(menu, NULL, NULL);
     menu_add(menu, "Attributes...",     do_image_info_dialog);
-    menu_add(menu, "Colour scaling...", do_colour_dialog);
     menu_add(menu, "Coordinates...",    do_coords_dialog);
     menu_add(menu, NULL, NULL);
     switch_menu_cmd = menu_add(menu, "Switch fractal type",
@@ -501,14 +491,11 @@ void create_menus(GtkWidget* vbox)
 
     menu = gtk_menu_new();
 
+    menu_add(menu, "Colours", do_pal_edit_dialog);
+    menu_add(menu, NULL, NULL);
     menu_add(menu, "Load MAP", palette_load_cmd);
     menu_add(menu, "Save MAP", palette_save_cmd);
 
-    menu_add(menu, NULL, NULL);
-    menu_add(menu, "Cycle...", do_pal_rot_dialog);
-    menu_add(menu, NULL, NULL);
-    menu_add(menu, "Randomize", do_pal_rnd_dialog);
-    menu_add(menu, "Functions", do_pal_fun_dialog);
     menu_bar_add(menu_bar, menu, "Palette");
 
     menu = gtk_hseparator_new();

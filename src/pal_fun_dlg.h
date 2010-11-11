@@ -3,10 +3,12 @@
 
 #include "image_info.h"
 #include "palette.h"
-#include "main.h"
+#include "pal_display_gui.h"
 
-typedef struct {
-    GtkWidget* window;
+typedef struct
+{
+    GtkWidget* box;
+
     GtkWidget* ex_rg_button;
     GtkWidget* ex_gb_button;
     GtkWidget* ex_br_button;
@@ -15,12 +17,11 @@ typedef struct {
     GtkWidget* inv_r_button;
     GtkWidget* inv_g_button;
     GtkWidget* inv_b_button;
-    GtkWidget* close_button;
-    GtkWidget* dismiss_button;
-    GtkWidget* offset;
-    GtkWidget* stripe;
-    GtkWidget* spread;
+
+    pal_affect* pa;
+
     function_palette* fun_pal;
+
 } palette_fun_dialog;
 
 void palette_fun_dlg_new(palette_fun_dialog** ptr, function_palette* fp);
