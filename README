@@ -1,3 +1,5 @@
+mdz - Mandelbrot Deep Zoom
+
 http://jwm-art.net/mdz/
 
 mdz is a Mandelbrot-Set image generator which can use arbitrary precision
@@ -12,66 +14,73 @@ zoom really deep with arbitrary precision math.
 
 the code of mdz-0.0.9 is now a significant departure from gkII.
 
-----------
 
-command line options
+Command Line Options
+---------------------
 
-the command line options are specifically for those cases where you
+The command line options are specifically for those cases where you
 want to render an image without interacting with the program at all.
-or, the command line options can be used to render a 'final' image,
-and the gui should be thought of as more for exploration (infact for
-the new features coming in 0.0.6 i am considering limiting the image
-size because certain features will require even more memory).
+You could view the gui of mdz as simply a tool for exploring the M-Set
+and then use the command line options to render a final image once
+something sufficiently interesting has been located in the explorer.
 
-----------
 
-         ***** IF YOU SEE BIG BLOCKY PIXELS *****
+Multi-Precision Maths Routines
+-------------------------------
 
-BY DEFAULT THE ARBITRARY MATHS ROUTINES ARE TURNED OFF. YOU MUST ENABLE
-THEM IN THE IMAGE->ATTRIBUTES DIALOG. arbitrary maths routines are not
-required until zooming has taken you into a sufficient depth. At this
-stage, the arbitrary maths routines must be manually switched on, but
-you will see when you need them as the images become blocky.
+By default the multi-precision maths routines are turned off. This means
+you must turn them on when needed. There are two ways to find out when you
+need to turn them on. The first is just to look at the rendered image.
+If it appears to be composed of clunky blocks instead of tiny pixels then 
+the multi-precision maths routines need activating.
 
-You may specify how much precision to use with the arbitrary maths
-routines. The minimum setting mdz allows was 80 bits but is now 2 bits
-for reasons of fullness. Next to the precision setting is a label
-telling you the 'scant minimum' number of bits required to render any
-image. The scant minimum value is a precision which will render the
-image to a barely acceptable state.
+Activate the multi-precision maths routines via the attributes dialog.
 
-Warning: the arbitrary maths routines are slow in comparison, and the
-deeper you zoom, and the more precision you ask for, the slower the
+You will also encounter clunky blocks even with the multi-precision maths
+routines active. This is because mdz does not automatically set how much
+precision the multi-precision maths routines use, you must choose a value
+yourself.
+
+However, mdz does calculate a value which is the scant minimum amount of
+precision you could get away with to render an image. The scant minimum
+value only provides enough precision for poor quality renders so choose
+always choose a higher value for final renders.
+
+
+WARNING: the arbitrary maths routines slow rendering to a crawl and
+the deeper you zoom, and the more precision you ask for, the slower the
 calculations will become.
 
-Reduce the image size down to 240 x 180 once you require arbitary
-precision maths. Once you've found an image, save the settings and
-use the command line to render the image at higher resolution.
+To counter this, reduce the image size down to 240 x 180 until you have
+located your image and then save the settings (first making sure you have
+set the precision above the scant minimum). You can then render the image
+from the commandline specifying how large it should be and anti-aliasing
+options etc.
 
 
------------
+Multi-threading
+----------------
 
-threading
+The default number of rendering threads is 2 for conservative reasons.
+mdz used to use 64 threads by default but was reduced to 2 so that the
+system running mdz remains responsive.
 
-the default number of rendering threads is 64 which might seem rather
-arbitrary. you can increase or decrease this value by using the --threads
-command line option followed by the number you require. note however mdz
-may decide to use less anyway, depending on the image size. this is my
-first multi-threaded program i have written, and in my tests, the best
-performance was yeilded by a high number of threads such as 256.
+However, it seems that mdz will run significantly faster if you increase
+the number of rendering threads (either from the command line or from the
+attributes dialog) at the cost of making the system running mdz
+unresponsive.
 
 
------------
+Colours + Palettes
+-------------------
 
-colours + palettes
+mdz can read fractint .map colour palette files and can save them too. It
+is also possible to read the palette section from within an MDZ settings
+file without loading the settings (and vice-versa).
 
-mdz can read fractint .map colour palette files and can save them too. It is
-also possible to read the palette section from within an MDZ settings file
-without loading the settings (and vice-versa).
 
------------
-
-colour cycling and anti-aliasing
+Colour Cycling and Anti-Aliasing
+---------------------------------
 
 without anti-aliasing, there are no problems with colour cycling. with
 anti-aliasing, don't be surprised if the palette display does not update
@@ -79,14 +88,15 @@ in time with the cycling. general rule of thumb: don't push it ;-)
 
 
 
------------
 mdz development
+----------------
 
-mdz will not be able to generate other types of fractals or other colouring
-methods. mdz is focused upon exploration of the Mandelbrot-Set using the
-standard colouring method only with the concept being that the Mandelbrot-Set
-is in fact complex enough to actually simulate other colouring methods should
-the explorer have the patience and knowledge to find them ;-)
+It is currently not planned for mdz to render anything than the Mandelbrot
+and Julia sets. Nor are any fanciful colouring methods (perhaps the smooth
+colouring variant).
 
-
+mdz is supposed to be a tool for exploring the Mandelbrot set without too
+many distractions - it is believed by the author that the Mandelbrot Set 
+is sufficiently complex that it should be possible to find interesting 
+images within it that do not require fanciful colouring methods.
 
