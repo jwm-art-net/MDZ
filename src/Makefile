@@ -13,7 +13,7 @@ CFLAGS := $(DEFS) -O3 -fomit-frame-pointer -Winline
 
 #Other CFLAGS options:
 #CFLAGS := $(DEFS) -O3 -fomit-frame-pointer -Winline -DWITH_TMZ_CMDLINE
-CFLAGS := $(DEFS) -ggdb -DDEBUG
+#CFLAGS := $(DEFS) -ggdb -DDEBUG
 
 LIBS   := -lpng -lz -lgmp -lmpfr -lpthread
 

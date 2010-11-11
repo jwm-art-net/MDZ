@@ -10,6 +10,8 @@ mdz has stripped out most of the features from gkII and improves
 performance with multi-threaded rendering, and adds the ability to
 zoom really deep with arbitrary precision math.
 
+the code of mdz-0.0.9 is now a significant departure from gkII.
+
 ----------
 
 command line options
@@ -42,7 +44,7 @@ Warning: the arbitrary maths routines are slow in comparison, and the
 deeper you zoom, and the more precision you ask for, the slower the
 calculations will become.
 
-Reduce the image size down to 240 x 120 once you require arbitary
+Reduce the image size down to 240 x 180 once you require arbitary
 precision maths. Once you've found an image, save the settings and
 use the command line to render the image at higher resolution.
 
@@ -60,6 +62,24 @@ performance was yeilded by a high number of threads such as 256.
 
 
 -----------
+
+colours + palettes
+
+mdz can read fractint .map colour palette files and can save them too. It is
+also possible to read the palette section from within an MDZ settings file
+without loading the settings (and vice-versa).
+
+-----------
+
+colour cycling and anti-aliasing
+
+without anti-aliasing, there are no problems with colour cycling. with
+anti-aliasing, don't be surprised if the palette display does not update
+in time with the cycling. general rule of thumb: don't push it ;-)
+
+
+
+-----------
 mdz development
 
 mdz will not be able to generate other types of fractals or other colouring
@@ -69,11 +89,4 @@ is in fact complex enough to actually simulate other colouring methods should
 the explorer have the patience and knowledge to find them ;-)
 
 
------------
-
-colour palettes
-
-mdz can read fractint .map colour palette files and can save them too. It is
-also possible to read the palette section from within an MDZ settings file
-without loading the settings (and vice-versa).
 
