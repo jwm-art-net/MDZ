@@ -2,7 +2,7 @@ mdz - Mandelbrot Deep Zoom
 
 http://jwm-art.net/mdz/
 
-mdz is a Mandelbrot-Set image generator which can use arbitrary precision
+mdz is a Mandelbrot-Set image generator which can use multi-precision
 maths to zoom in as deep as you have patience for.
 
 mdz is a fork from gkII ( http://www.jwm-art.net/gkII ) which in turn
@@ -10,7 +10,7 @@ is a fork of gfract ( http://code.google.com/p/gfract/ ).
 
 mdz has stripped out most of the features from gkII and improves
 performance with multi-threaded rendering, and adds the ability to
-zoom really deep with arbitrary precision math.
+zoom really deep with multi-precision math.
 
 the code of mdz-0.0.9 is now a significant departure from gkII.
 

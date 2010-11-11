@@ -1,20 +1,17 @@
-for mdz-0.0.6 i'm planning on implementing the following:
+Todo currently:
 
-* allow zoom and reposition tools to be switched between without
-  depressing the currently selected tool (ie make it work like
-  any other tool bar).
+ * When zoom-in-new window or duplicate is used the following settings
+   should be transferred to the new instance:
+        * palette offset
+        * image dimension
+    (currently these settings are 'forgotten').
 
-* options to adjust size of image generated without scaling, and
-  provide option to scale by y instead of always by x.
+Todo for consideration:
 
-* size adjustment without scaling should not require the entire
-  window to be recalculated, nor should repositioning. (ie make
-  it possible to render specific parts of the image).
+ * investigate smooth colouring
+ * investigate guessing algorithm + zoom optimization
 
-* store which lines have pixels within the inside of the M-set
-  such that when only the iterations are increased, only these
-  lines are recalculated.
+Todo long term:
 
-* a crop tool, maybe, but it's rather low on my list of priorities.
-
-* the colours/palette stuff needs some more attention somewhere.
+ * only draw parts of image that are necessary (ie after reposition).
+ * more control over viewport scaling + resizing.
