@@ -56,6 +56,13 @@ image_info * image_info_create(fractal_type fr)
     mpfr_init2( img->u.julia.c_re, DEFAULT_PRECISION);
     mpfr_init2( img->u.julia.c_im, DEFAULT_PRECISION);
 
+    #ifdef WITH_GMP
+    mpf_init2(  img->gxmin, DEFAULT_PRECISION);
+    mpf_init2(  img->gxmax, DEFAULT_PRECISION);
+    mpf_init2(  img->gymax, DEFAULT_PRECISION);
+    mpf_init2(  img->gwidth, DEFAULT_PRECISION);
+    #endif
+
     img->pcoords = coords_new(img->real_width, img->real_height,
                                                    cx, cy, size);
     image_info_reset_view(img);
@@ -70,6 +77,13 @@ void image_info_destroy(image_info* img)
     mpfr_clear( img->xmax );
     mpfr_clear( img->ymax );
     mpfr_clear( img->width );
+
+    #ifdef WITH_GMP
+    mpf_clear(  img->gxmin );
+    mpf_clear(  img->gxmax );
+    mpf_clear(  img->gymax );
+    mpf_clear(  img->gwidth );
+    #endif
 
     mpfr_clear( img->old_cx );
     mpfr_clear( img->old_cy );
@@ -207,6 +221,13 @@ void image_info_mpfr_change(image_info * img, mp_prec_t precision)
     precision_change(   img->u.julia.c_re,  precision   );
     precision_change(   img->u.julia.c_re,  precision   );
 
+    #ifdef WITH_GMP
+    precision_change_gmp(   img->gxmin, precision );
+    precision_change_gmp(   img->gxmax, precision );
+    precision_change_gmp(   img->gymax, precision );
+    precision_change_gmp(   img->gwidth, precision );
+    #endif
+
     coords_set_precision(   img->pcoords,   precision   );
 }
 
@@ -234,7 +255,12 @@ void image_info_set_mpfr(image_info* img, gboolean use_mpfr)
     if (use_mpfr)
     {
         img->using_mpfr = TRUE;
+
+        #ifdef WITH_GMP
+        rth_set_next_line_cb(rth, fractal_gmp_calculate_line);
+        #else
         rth_set_next_line_cb(rth, fractal_mpfr_calculate_line);
+        #endif
     }
     else
     {

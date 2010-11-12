@@ -593,6 +593,12 @@ void gui_start_rendering(image_info* img)
 
     coords_get_rect(img->pcoords,   img->xmin, img->xmax,
                                     img->ymax, img->width);
+
+    #ifdef WITH_GMP
+    coords_get_rect_gmp(img->pcoords,   img->gxmin, img->gxmax,
+                                        img->gymax, img->gwidth);
+    #endif
+
     if (!img->j_pre)
     {
         gtk_spin_button_update( GTK_SPIN_BUTTON(depth_spin));

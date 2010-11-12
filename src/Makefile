@@ -7,7 +7,7 @@ PROG := mdz
 
 CC := gcc
 
-DEFS := -Wall -Wextra -pedantic -std=gnu99 -DVERSION=\"$(VERSION)\"
+DEFS := -Wall -Wextra -pedantic -std=gnu99 -DVERSION=\"$(VERSION)\" -DWITH_GMP
 
 CFLAGS := $(DEFS) -O3 -fomit-frame-pointer -Winline
 

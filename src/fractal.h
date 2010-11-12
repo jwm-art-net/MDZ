@@ -17,4 +17,9 @@
 int fractal_calculate_line(image_info* img, int line);
 int fractal_mpfr_calculate_line(image_info* img, int line);
 
+#ifdef WITH_GMP
+int fractal_gmp_calculate_line(image_info* img, int line);
+#endif
+
+
 #endif

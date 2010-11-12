@@ -67,6 +67,10 @@ typedef struct image_info
 {
     mpfr_t  xmin, xmax, ymax, width;
 
+    #ifdef WITH_GMP
+    mpf_t   gxmin, gxmax, gymax, gwidth;
+    #endif
+
     /* saved mandel coords.                         */
     /* we need these when  switching back from      */
     /* julia mode                                   */

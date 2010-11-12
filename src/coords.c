@@ -8,6 +8,22 @@
 #include "debug.h"
 
 
+#ifdef WITH_GMP
+
+#include "my_mpfr_to_str.h"
+
+void mpfr_to_gmp(mpfr_t from, mpf_t to)
+{
+    char* str = my_mpfr_to_str(from);
+    mpf_set_str (to, str, 10);
+
+    printf("%s\n",str);
+    free(str);
+}
+
+#endif
+
+
 static void coords_mpfr_clear(coords* c);
 
 
@@ -290,6 +306,19 @@ void coords_get_rect(coords* c, mpfr_t xmin, mpfr_t xmax,
 }
 
 
+#ifdef WITH_GMP
+void coords_get_rect_gmp(coords* c, mpf_t xmin, mpf_t xmax,
+                                    mpf_t ymax, mpf_t width)
+{
+    coords_center_to_rect(c);
+    mpfr_to_gmp(c->xmin, xmin);
+    mpfr_to_gmp(c->xmax, xmax);
+    mpfr_to_gmp(c->ymax, ymax);
+    mpfr_to_gmp(c->width, width);
+}
+#endif
+
+
 void coords_set_rect(coords* c, mpfr_t xmin, mpfr_t xmax, mpfr_t ymax)
 {
     mpfr_set(c->xmin,  xmin, GMP_RNDN);
@@ -433,6 +462,21 @@ void precision_change(mpfr_t x, mp_prec_t p)
 
     mpfr_clear(tmp);
 }
+
+
+#ifdef WITH_GMP
+void precision_change_gmp(mpf_t x, mp_bitcnt_t p)
+{
+    mpf_t tmp;
+
+    mpf_init2(tmp, p);
+    mpf_set(tmp,   x);
+    mpf_set_prec(  x,      p);
+    mpf_set(       x,      tmp);
+
+    mpf_clear(tmp);
+}
+#endif
 
 
 static void coords_mpfr_clear(coords* c)

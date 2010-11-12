@@ -1,3 +1,9 @@
+Todo RIGHT AT THIS VERY MOMENT!
+
+ * Testing GMP rendering speeds over MPFR rendering speeds.
+   GMP seems faster. May keep GMP rendering as an option.
+
+
 Todo currently:
 
  * When zoom-in-new window or duplicate is used the following settings
