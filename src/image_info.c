@@ -16,11 +16,10 @@
 
 static const char* file_header = "mdz fractal settings";
 
-const char* fractal_str[] = { "mandelbrot", "julia", 0 };
 const char* coords_str[] =  { "cx", "xmin", 0 };
 const char* paloff_str =  "palette-offset";
 
-image_info * image_info_create(fractal_type fr)
+image_info * image_info_create(int family, int fractal)
 {
     double cx =    -0.5;
     double cy =     0.0;
@@ -29,14 +28,15 @@ image_info * image_info_create(fractal_type fr)
     image_info * img = malloc(sizeof(image_info));
     memset(img, 0, sizeof(image_info));
 
-    img->fr_type =      fr;
+    img->family =       family;
+    img->fractal =      fractal;
     img->real_width =   img->user_width =    DEFAULT_WIDTH;
     img->real_height =  img->user_height =   DEFAULT_HEIGHT;
     img->aspect =        DEFAULT_ASPECT;
     img->thread_count = 0; /* it gets set by opts sooner or later */
     img->draw_lines = 64;
 
-    if (fr == JULIA)
+    if (family == FAMILY_JULIA)
     {
         img->j_pre = TRUE;
         img->thread_count = 2;
@@ -56,12 +56,10 @@ image_info * image_info_create(fractal_type fr)
     mpfr_init2( img->u.julia.c_re, DEFAULT_PRECISION);
     mpfr_init2( img->u.julia.c_im, DEFAULT_PRECISION);
 
-    #ifdef WITH_GMP
     mpf_init2(  img->gxmin, DEFAULT_PRECISION);
     mpf_init2(  img->gxmax, DEFAULT_PRECISION);
     mpf_init2(  img->gymax, DEFAULT_PRECISION);
     mpf_init2(  img->gwidth, DEFAULT_PRECISION);
-    #endif
 
     img->pcoords = coords_new(img->real_width, img->real_height,
                                                    cx, cy, size);
@@ -78,12 +76,10 @@ void image_info_destroy(image_info* img)
     mpfr_clear( img->ymax );
     mpfr_clear( img->width );
 
-    #ifdef WITH_GMP
     mpf_clear(  img->gxmin );
     mpf_clear(  img->gxmax );
     mpf_clear(  img->gymax );
     mpf_clear(  img->gwidth );
-    #endif
 
     mpfr_clear( img->old_cx );
     mpfr_clear( img->old_cy );
@@ -134,21 +130,17 @@ void image_info_set(image_info* img, int w, int h, int aa_factor)
 
     image_info_clear_image(img, TRUE, !same_size);
 
-    image_info_threads_change(img, img->thread_count);
-    image_info_set_mpfr(img, img->using_mpfr);
-}
-
-void image_info_mpfr_init(image_info * img)
-{
-    img->using_mpfr = TRUE;
+    image_info_threads_change(img,  img->thread_count);
+    image_info_set_multi_prec(img,  img->use_multi_prec,
+                                    img->use_rounding   );
 }
 
 
 void image_info_switch_fractal(image_info* img, int real_px, int imag_py)
 {
-    if (img->fr_type == JULIA)
+    if (img->family == FAMILY_JULIA)
     {
-        img->fr_type = MANDELBROT;
+        img->family = FAMILY_MANDEL;
 
         /* restore M-Set coordinates from before switch */
         coords_to(img->pcoords, img->old_cx, img->old_cy);
@@ -157,9 +149,9 @@ void image_info_switch_fractal(image_info* img, int real_px, int imag_py)
         /* restore M-Set initial zoom position */
         img->pcoords->init_cx = -0.5;
     }
-    else if (img->fr_type == MANDELBROT)
+    else if (img->family == FAMILY_MANDEL)
     {
-        img->fr_type = JULIA;
+        img->family = FAMILY_JULIA;
 
         mpfr_set_d(img->u.julia.c_re,   real_px,   GMP_RNDN);
         mpfr_set_d(img->u.julia.c_im,   imag_py,   GMP_RNDN);
@@ -201,7 +193,50 @@ void image_info_threads_change(image_info* img, int thread_count)
 }
 
 
-void image_info_mpfr_change(image_info * img, mp_prec_t precision)
+
+void image_info_clear_image(image_info* img, bool raw, bool rgb)
+{
+    int i;
+
+    if (raw)
+    {
+        for (i=0; i < img->real_width*img->real_height; i++)
+            img->raw_data[i] = UINT_MAX;
+    }
+
+    if (rgb)
+    {
+        for (i=0; i < img->user_width*img->user_height; i++)
+            img->rgb_data[i] = palette[0];
+    }
+}
+
+
+void image_info_set_multi_prec(image_info* img, bool use_multi_prec,
+                                                bool use_rounding)
+{
+    rthdata* rth = (rthdata*)img->rth_ptr;
+
+    if (!img->rth_ptr)
+        return; /* to prevent seg fault happening */
+
+    img->use_multi_prec = use_multi_prec;
+
+    if (use_multi_prec)
+    {
+        img->use_rounding = use_rounding;
+
+        if (use_rounding)
+            rth_set_next_line_cb(rth, fractal_mpfr_calculate_line);
+        else
+            rth_set_next_line_cb(rth, fractal_gmp_calculate_line);
+    }
+    else
+        rth_set_next_line_cb(rth, fractal_calculate_line);
+}
+
+
+void image_info_set_precision(image_info * img, mpfr_prec_t precision)
 {
     if (img->precision == precision)
         return;
@@ -221,53 +256,14 @@ void image_info_mpfr_change(image_info * img, mp_prec_t precision)
     precision_change(   img->u.julia.c_re,  precision   );
     precision_change(   img->u.julia.c_re,  precision   );
 
-    #ifdef WITH_GMP
     precision_change_gmp(   img->gxmin, precision );
     precision_change_gmp(   img->gxmax, precision );
     precision_change_gmp(   img->gymax, precision );
     precision_change_gmp(   img->gwidth, precision );
-    #endif
 
     coords_set_precision(   img->pcoords,   precision   );
 }
 
-void image_info_clear_image(image_info* img, gboolean raw, gboolean rgb)
-{
-    int i;
-
-    if (raw) {
-        for (i=0; i < img->real_width*img->real_height; i++)
-            img->raw_data[i] = UINT_MAX;
-    }
-    if (rgb) {
-        for (i=0; i < img->user_width*img->user_height; i++)
-            img->rgb_data[i] = palette[0];
-    }
-}
-
-void image_info_set_mpfr(image_info* img, gboolean use_mpfr)
-{
-    rthdata* rth = (rthdata*)img->rth_ptr;
-
-    if (!img->rth_ptr)
-        return; /* for when called via image_info_create */
-
-    if (use_mpfr)
-    {
-        img->using_mpfr = TRUE;
-
-        #ifdef WITH_GMP
-        rth_set_next_line_cb(rth, fractal_gmp_calculate_line);
-        #else
-        rth_set_next_line_cb(rth, fractal_mpfr_calculate_line);
-        #endif
-    }
-    else
-    {
-        img->using_mpfr = FALSE;
-        rth_set_next_line_cb(rth, fractal_calculate_line);
-    }
-}
 
 
 void image_info_reset_view(image_info* img)
@@ -279,7 +275,7 @@ void image_info_reset_view(image_info* img)
     img->palette_ip =   FALSE;
     img->zoom_new_win = FALSE;
 
-    image_info_set_mpfr(img, FALSE);
+    image_info_set_multi_prec(img, FALSE, FALSE);
 
     coords_reset(img->pcoords);
 
@@ -342,13 +338,23 @@ int image_info_save_settings(image_info * img, FILE* fd)
     setlocale(LC_NUMERIC, "C");
 
     fprintf(fd, "settings\n");
-    fprintf(fd, "fractal %s\n", fractal_str[img->fr_type]);
+    fprintf(fd, "family %s\n", family_str[img->family]);
     fprintf(fd, "depth %d\n", img->depth);
     fprintf(fd, "aspect %0.20lf\n", img->aspect);
     fprintf(fd, "colour-scale %0.20lf\n", img->colour_scale);
+
     fprintf(fd, "colour-interpolate %s\n", (img->palette_ip)
-                                            ? "yes" : "no");
-    fprintf(fd, "mpfr %s\n", (img->using_mpfr) ? "yes" : "no");
+                                            ? "yes"
+                                            : "no");
+
+    fprintf(fd, "multi-precision %s\n", (img->use_multi_prec)
+                                            ? "yes"
+                                            : "no");
+
+    fprintf(fd, "multi-rounding %s\n", (img->use_rounding)
+                                            ? "yes"
+                                            : "no");
+
     fprintf(fd, "precision %d\n", (unsigned int)img->precision);
 
     fprintf(fd, "%scx ", center);
@@ -365,7 +371,7 @@ int image_info_save_settings(image_info * img, FILE* fd)
     fprintf(fd, "\n%symax ", corner);
     mpfr_out_str (fd, 10, 0, img->ymax, GMP_RNDN);
 
-    if (img->fr_type == JULIA)
+    if (img->family && FAMILY_JULIA)
     {
         fprintf(fd, "\njulia-real ");
         mpfr_out_str(fd, 10, 0, img->u.julia.c_re, GMP_RNDN);
@@ -422,7 +428,8 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
     long precision;
     long depth;
     double aspect;
-    int usempfr = 0;
+    int use_multi_prec = 0;
+    int use_rounding = 1;
     int w,h;
     int fr_type;
     double colsc;
@@ -449,7 +456,8 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
     if (colip == -1)
         return mdzfile_err(mf, "Errror in colour-interpolate setting");
 
-    if ((usempfr = mdzfile_get_index(mf, "mpfr", options_no_yes)) == -1)
+    use_multi_prec = mdzfile_get_index(mf, "mpfr", options_no_yes);
+    if (use_multi_prec == -1)
         return mdzfile_err(mf, "Errror in mpfr setting");
 
     if (!mdzfile_get_long(mf, "precision", &precision, 80, 99999999))
@@ -503,7 +511,7 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
         }
     }
 
-    if (fr_type == JULIA)
+    if (fr_type == FAMILY_JULIA)
     {
         if (!mdzfile_get_mpfr_t(mf, "julia-real", j_re))
         {
@@ -536,14 +544,14 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
     h = w / aspect;
 
     image_info_set(img, w, h, 1);
-    img->fr_type =      fr_type;
+    img->family =      fr_type;
     img->depth =        depth;
-    image_info_set_mpfr(img, usempfr);
+    image_info_set_multi_prec(img, use_multi_prec, use_rounding);
     img->colour_scale = colsc;
     img->palette_ip =   colip;
 
     coords_set_precision(img->pcoords, precision);
-    image_info_mpfr_change(img, precision);
+    image_info_set_precision(img, precision);
 
     if (img->ui_ref_center)
     {
@@ -555,7 +563,7 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
         coords_set_rect(img->pcoords, xmin, xmax, ymax);
     }
 
-    if (fr_type == JULIA)
+    if (fr_type == FAMILY_JULIA)
     {
         mpfr_set(img->u.julia.c_re, j_re, GMP_RNDN);
         mpfr_set(img->u.julia.c_im, j_im, GMP_RNDN);

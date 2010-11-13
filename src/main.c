@@ -91,7 +91,7 @@ int main(int argc, char** argv)
     if (!palette_init())
         palette_randomize(&rnd_palette);
 
-    img = image_info_create(MANDELBROT);
+    img = image_info_create(FAMILY_MANDEL, MANDELBROT);
 
     init_misc();
 

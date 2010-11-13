@@ -18,9 +18,11 @@ typedef struct
     GtkWidget* ok_button;
     GtkWidget* apply_button;
 
-    GtkWidget* using_mpfr;
+    GtkWidget* use_multi_prec;
+    GtkWidget* use_rounding;
     GtkWidget* precision;
     GtkWidget* thread_count;
+    GtkWidget* actual_prec;
 
     GtkWidget* plabel;
 

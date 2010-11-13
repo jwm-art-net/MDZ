@@ -19,7 +19,7 @@ static void height_update(GtkWidget* w, image_info_dialog* dl);
 static void aa_update(GtkWidget* w, image_info_dialog* dl);
 static void constrain_update(GtkWidget*w, image_info_dialog* dl);
 static void update_text(GtkLabel* label, int w, int h, int aa);
-static void mpfr_update(GtkWidget*w, image_info_dialog* dl);
+static void mp_update(GtkWidget*w, image_info_dialog* dl);
 
 static guint width_sig = 0;
 static guint height_sig = 0;
@@ -155,15 +155,30 @@ void image_info_dlg_new(image_info_dialog** ptr, image_info* img)
     gtk_widget_show(tmp);
     ++y;
 
-    tmp = gtk_check_button_new_with_label("Arbitrary Precision Math");
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tmp), img->using_mpfr);
+    tmp = gtk_check_button_new_with_label("Multiple Precision Math");
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tmp),
+                                                img->use_multi_prec);
     gtk_table_attach_defaults(GTK_TABLE(table), tmp, 0, 2, y, y+1);
     g_signal_connect(GTK_OBJECT(tmp), "toggled",
-                       G_CALLBACK(mpfr_update),
+                       G_CALLBACK(mp_update),
                        dl);
     gtk_widget_set_tooltip_text(tmp, "Increases zoom depth");
     gtk_widget_show(tmp);
-    dl->using_mpfr = tmp;
+    dl->use_multi_prec = tmp;
+    ++y;
+
+    tmp = gtk_check_button_new_with_label("Correct Rounding");
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tmp),
+                                                img->use_rounding);
+    gtk_table_attach_defaults(GTK_TABLE(table), tmp, 0, 2, y, y+1);
+    gtk_widget_set_tooltip_text(tmp,
+            "Correct rounding rounds the result of calculations exactly"
+            "to the specified precision. Is slower in many instances, "
+            "but calculations may use more precision in order to arrive "
+            "at the correct result.");
+
+    gtk_widget_show(tmp);
+    dl->use_rounding = tmp;
     ++y;
 
     tmp = gtk_label_new(""); /* precision (bits) */
@@ -178,9 +193,20 @@ void image_info_dlg_new(image_info_dialog** ptr, image_info* img)
     gtk_table_attach_defaults(GTK_TABLE(table), tmp, 1, 2, y, y+1);
     gtk_widget_set_tooltip_text(tmp,
                             "How many bits to use for Maths precision");
-    gtk_widget_set_sensitive(tmp, img->using_mpfr);
+    gtk_widget_set_sensitive(tmp, img->use_multi_prec);
     gtk_widget_show(tmp);
     dl->precision = tmp;
+    ++y;
+
+    tmp = gtk_label_new(""); /* actual precision (non-rounding) */
+    gtk_misc_set_alignment(GTK_MISC(tmp), 0.0, 0.5);
+    gtk_table_attach_defaults(GTK_TABLE(table), tmp, 0, 2, y, y+1);
+    dl->actual_prec = tmp;
+    gtk_widget_show(tmp);
+    gtk_widget_set_sensitive(tmp, FALSE);
+    gtk_widget_set_tooltip_text(tmp,
+            "The actual precision used when not using correct rounding "
+            "(and multiple precision is activated).");
     ++y;
 
     tmp = gtk_hseparator_new();
@@ -210,6 +236,7 @@ void image_info_dlg_new(image_info_dialog** ptr, image_info* img)
     gtk_widget_show(dl->dialog);
 }
 
+
 void width_update(GtkWidget* w, image_info_dialog* dl)
 {
     (void)w;
@@ -219,17 +246,20 @@ void width_update(GtkWidget* w, image_info_dialog* dl)
     if (width <= 0)
         return;
 
-    if (GTK_TOGGLE_BUTTON(dl->const_ra)->active) {
+    if (GTK_TOGGLE_BUTTON(dl->const_ra)->active)
+    {
         height = width/dl->ratio;
         g_signal_handler_block(GTK_OBJECT(dl->height),height_sig);
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(dl->height),
                                   height);
         g_signal_handler_unblock(GTK_OBJECT(dl->height),height_sig);
     }
+
     update_text(GTK_LABEL(dl->text), width,
         gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(dl->height)),
         gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(dl->aa)));
 }
+
 
 void height_update(GtkWidget* w, image_info_dialog* dl)
 {
@@ -240,13 +270,15 @@ void height_update(GtkWidget* w, image_info_dialog* dl)
     if (height <= 0)
         return;
 
-    if (GTK_TOGGLE_BUTTON(dl->const_ra)->active) {
+    if (GTK_TOGGLE_BUTTON(dl->const_ra)->active)
+    {
         width = height*dl->ratio;
         g_signal_handler_block(GTK_OBJECT(dl->width),width_sig);
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(dl->width),
                                   width);
         g_signal_handler_unblock(GTK_OBJECT(dl->width),width_sig);
     }
+
     update_text(GTK_LABEL(dl->text),
         gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(dl->width)),
         height, gtk_spin_button_get_value_as_int(
@@ -268,7 +300,8 @@ void aa_update(GtkWidget* w, image_info_dialog* dl)
 void constrain_update(GtkWidget* w, image_info_dialog* dl)
 {
     (void)w;
-    if (GTK_TOGGLE_BUTTON(dl->const_ra)->active) {
+    if (GTK_TOGGLE_BUTTON(dl->const_ra)->active)
+    {
         dl->ratio =
             gtk_spin_button_get_value(GTK_SPIN_BUTTON(dl->width)) /
             gtk_spin_button_get_value(GTK_SPIN_BUTTON(dl->height));
@@ -292,21 +325,28 @@ void image_dlg_update_recommended_precision(image_info_dialog* dl,
     sprintf(str, "Precision (bits):\nScant minimum:%ld",
                         (long)img->pcoords->recommend);
     gtk_label_set_text(GTK_LABEL(dl->plabel), str);
-    mpfr_update(0, dl);
+
+    sprintf(str, "Non-rounding precision :%ld",
+                        (long)img->pcoords->gmp_precision);
+    gtk_label_set_text(GTK_LABEL(dl->actual_prec), str);
+
+    mp_update(0, dl);
 }
 
-void mpfr_update(GtkWidget* w, image_info_dialog* dl)
+void mp_update(GtkWidget* w, image_info_dialog* dl)
 {
     (void)w;
-    if (GTK_TOGGLE_BUTTON(dl->using_mpfr)->active)
+    if (GTK_TOGGLE_BUTTON(dl->use_multi_prec)->active)
     {
         gtk_widget_set_sensitive(dl->precision, TRUE);
         gtk_widget_set_sensitive(dl->plabel, TRUE);
+        gtk_widget_set_sensitive(dl->use_rounding, TRUE);
     }
     else
     {
         gtk_widget_set_sensitive(dl->precision, FALSE);
         gtk_widget_set_sensitive(dl->plabel, FALSE);
+        gtk_widget_set_sensitive(dl->use_rounding, FALSE);
     }
 }
 
@@ -326,10 +366,16 @@ void image_info_ok_cmd(GtkWidget* w, image_info_dialog* dl)
 void image_info_apply_cmd(GtkWidget* widget, image_info_dialog* dl)
 {
     (void)widget;
-    mp_prec_t p;
     int tc;
 
-    gboolean changed = FALSE;
+    mp_prec_t precision =
+        gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(dl->precision));
+
+    bool changed = FALSE;
+    bool use_multi_prec = gtk_toggle_button_get_active(
+                                GTK_TOGGLE_BUTTON(dl->use_multi_prec));
+    bool use_rounding =
+        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dl->use_rounding));
 
     int w = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(dl->width));
     int h = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(dl->height));
@@ -339,7 +385,7 @@ void image_info_apply_cmd(GtkWidget* widget, image_info_dialog* dl)
      || h != img->user_height
      || aa!= img->aa_factor)
     {
-        changed = TRUE;
+        changed = true;
         rth_ui_stop_render_and_wait((rthdata*)img->rth_ptr);
         image_info_set(img, w, h, aa);
         if (img->user_width < MIN_WINDOW_WIDTH)
@@ -350,25 +396,17 @@ void image_info_apply_cmd(GtkWidget* widget, image_info_dialog* dl)
             gui_resize(img->user_width, img->user_height);
     }
 
-    if (!img->using_mpfr &&
-        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dl->using_mpfr)))
+    if (img->use_multi_prec != use_multi_prec
+     || (use_multi_prec && img->use_rounding != use_rounding))
     {
-        changed = TRUE;
-        image_info_set_mpfr(img, TRUE);
+        changed = true;
+        image_info_set_multi_prec(img, use_multi_prec, use_rounding);
     }
-    else if (img->using_mpfr !=
-        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dl->using_mpfr)))
+
+    if (use_multi_prec && precision != img->precision)
     {
-        changed = TRUE;
-        image_info_set_mpfr(img, FALSE);
-    }
-    if (img->using_mpfr &&
-             img->precision != (p = gtk_spin_button_get_value_as_int(
-                                    GTK_SPIN_BUTTON(dl->precision))))
-    {
-        changed = TRUE;
-        image_info_mpfr_change(img,    p );
-        image_info_mpfr_change(j_pre,  p );
+        changed = true;
+        image_info_set_precision(img,   precision);
     }
 
     if (img->thread_count != (tc = gtk_spin_button_get_value_as_int(
@@ -526,8 +564,10 @@ void image_info_dlg_set(image_info* img, image_info_dialog* dl)
         gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(dl->height)),
         gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(dl->aa)));
 
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dl->using_mpfr),
-                                              img->using_mpfr);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dl->use_multi_prec),
+                                                    img->use_multi_prec);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dl->use_rounding),
+                                                    img->use_rounding);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(dl->precision),
                                               img->precision);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(dl->thread_count),

@@ -4,10 +4,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <mpfr.h>
-
-#ifdef WITH_GMP
 #include <gmp.h>
-#endif
 
 
 #define DEFAULT_PRECISION 80
@@ -19,11 +16,10 @@ int mpfr_mul_d(mpfr_t rop, mpfr_t op1, double _op2, mpfr_rnd_t rnd);
 #endif
 
 
+void mpfr_to_gmp(mpfr_t from, mpf_t to);
 void precision_change(mpfr_t x, mp_prec_t p);
-
-#ifdef WITH_GMP
 void precision_change_gmp(mpf_t x, mp_bitcnt_t p);
-#endif
+
 
 struct coords
 {
@@ -48,7 +44,9 @@ struct coords
     double aspect;
 
     mp_prec_t  precision;
-    mp_prec_t  recommend;
+    mp_prec_t  recommend; /* scant minimum */
+
+    mp_bitcnt_t gmp_precision; /* actual precision used by gmp */
 
     double init_cx;
     double init_cy;
@@ -95,11 +93,8 @@ void    coords_pixel_to_coord(coords*, mpfr_t x, mpfr_t y);
 void    coords_get_rect(coords*,    mpfr_t xmin, mpfr_t xmax,
                                     mpfr_t ymax, mpfr_t width);
 
-#ifdef WITH_GMP
 void    coords_get_rect_gmp(coords*,    mpf_t xmin, mpf_t xmax,
                                         mpf_t ymax, mpf_t width);
-#endif
-
 
 void    coords_set_rect(coords*,    mpfr_t xmin, mpfr_t xmax,
                                                  mpfr_t ymax);

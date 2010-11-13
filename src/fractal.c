@@ -1,107 +1,27 @@
 #include "fractal.h"
 #include "render_threads.h"
-#include <math.h>
 
 
-int frac_mandel(int depth,
-                long double wim,     long double wre,
-                long double c_im,    long double c_re,
-                long double wim2,    long double wre2  )
+#include "frac_mandel.h"
+#include "frac_burning_ship.h"
+#include "frac_generalized_celtic.h"
+
+
+const char* family_str[FAMILY_XXX_LAST] =
 {
-    int wz;
-    for (wz = 1; wz <= depth; ++wz)
-    {
-        wim = 2.0 * wre * wim + c_im;
-        wre = wre2 - wim2 + c_re;
-        wim2 = wim * wim;
-        wre2 = wre * wre;
-
-        if (wim2 + wre2 > 4.0F)
-            return wz;
-    }
-    return 0;
-}
+    "mandel",
+    "julia",
+    0
+};
 
 
-int frac_mandel_mpfr(int depth,
-                mpfr_t t1,          /* t1 == temporary */
-                mpfr_t frs_bail,
-                mpfr_t wim,     mpfr_t wre,
-                mpfr_t c_im,    mpfr_t c_re,
-                mpfr_t wim2,    mpfr_t wre2  )
+const char* fractal_str[FRACTAL_XXX_LAST] =
 {
-    int wz;
-    for (wz = 1; wz <= depth; wz++)
-    {
-        /* wim = 2.0 * wre * wim + c_im; */
-        mpfr_mul(   t1,     wre,    wim,    GMP_RNDN);
-        mpfr_mul_si(t1,     t1,     2,      GMP_RNDN);
-        mpfr_add(   wim,    t1,     c_im,   GMP_RNDN);
-        /* wre = wre2 - wim2 + c_re; */
-        mpfr_sub(   t1,     wre2,   wim2,   GMP_RNDN);
-        mpfr_add(   wre,    t1,     c_re,   GMP_RNDN);
-        /* wim2 = wim * wim; */
-        mpfr_mul(   wim2,   wim,    wim,    GMP_RNDN);
-        /* wre2 = wre * wre; */
-        mpfr_mul(   wre2,   wre,    wre,    GMP_RNDN);
-        /* if ((wim2 + wre2) > frs_bail) */
-        mpfr_add(   t1,     wim2,   wre2,   GMP_RNDN);
-        if (mpfr_greater_p(t1, frs_bail))
-            return wz;
-    }
-    return 0;
-}
-
-
-#ifdef WITH_GMP
-int frac_mandel_gmp(int depth, mpf_t frs_bail,
-                mpf_t t1,          /* t1 == temporary */
-                mpf_t wim,     mpf_t wre,
-                mpf_t c_im,    mpf_t c_re,
-                mpf_t wim2,    mpf_t wre2  )
-{
-    int wz;
-    for (wz = 1; wz <= depth; wz++)
-        {
-        /* wim = 2.0 * wre * wim + c_im; */
-        mpf_mul(   t1,     wre,    wim);
-        mpf_mul_ui(t1,     t1,     2);
-        mpf_add(   wim,    t1,     c_im);
-        /* wre = wre2 - wim2 + c_re; */
-        mpf_sub(   t1,     wre2,   wim2);
-        mpf_add(   wre,    t1,     c_re);
-        /* wim2 = wim * wim; */
-        mpf_mul(   wim2,   wim,    wim);
-        /* wre2 = wre * wre; */
-        mpf_mul(   wre2,   wre,    wre);
-        /* if ((wim2 + wre2) > frs_bail) */
-        mpf_add(   t1,     wim2,   wre2);
-        if (mpf_cmp(t1, frs_bail) > 0)
-            return wz;
-    }
-    return 0;
-}
-#endif
-
-
-int frac_celtic(int depth,
-                long double wim,     long double wre,
-                long double c_im,    long double c_re,
-                long double wim2,    long double wre2)
-{
-    int wz;
-    for (wz = 1; wz <= depth; ++wz)
-    {
-        wim = 2.0 * wre * wim + c_im;
-        wre = fabsl(wre2 - wim2) + c_re;
-        wim2 = wim * wim;
-        wre2 = wre * wre;
-
-        if (wim2 + wre2 > 4.0F)
-            return wz;
-    }
-    return 0;
-}
+    "mandelbrot",
+    "burning ship",
+    "generalized celtic",
+    0
+};
 
 
 int fractal_calculate_line(image_info* img, int line)
@@ -118,7 +38,6 @@ int fractal_calculate_line(image_info* img, int line)
     long double c_re = 0, c_im = 0;
 
     /* Working */
-    depth_t wz;
     long double wre,  wim;
     long double wre2, wim2;
     depth_t depth = img->depth;
@@ -131,7 +50,7 @@ int fractal_calculate_line(image_info* img, int line)
     ymax = mpfr_get_ld(img->ymax,   GMP_RNDN);
     width = xmax - xmin;
 
-    if (img->fr_type == JULIA)
+    if (img->family == FAMILY_JULIA)
     {
         j_c_re = mpfr_get_ld(img->u.julia.c_re, GMP_RNDN);
         j_c_im = mpfr_get_ld(img->u.julia.c_im, GMP_RNDN);
@@ -154,21 +73,35 @@ int fractal_calculate_line(image_info* img, int line)
             wim = y;
             wre2 = x2;
             wim2 = y2;
-            switch (img->fr_type)
+            switch (img->family)
             {
-            case MANDELBROT:
+            case FAMILY_MANDEL:
                 c_re = x;
                 c_im = y;
                 break;
-            case JULIA:
+            case FAMILY_JULIA:
                 c_re = j_c_re;
                 c_im = j_c_im;
                 break;
             }
-
-            *raw_data = frac_mandel(depth,  wim, wre,
-                                            c_im, c_re,
-                                            wim2, wre2);
+            switch(img->fractal)
+            {
+            case BURNING_SHIP:
+                *raw_data = frac_burning_ship(depth,  wim, wre,
+                                                c_im, c_re,
+                                                wim2, wre2);
+                break;
+            case GENERALIZED_CELTIC:
+                *raw_data = frac_generalized_celtic(depth,  wim, wre,
+                                                c_im, c_re,
+                                                wim2, wre2);
+                break;
+            case MANDELBROT:
+            default:
+                *raw_data = frac_mandel(depth,  wim, wre,
+                                                c_im, c_re,
+                                                wim2, wre2);
+            }
         }
         if (rth_render_should_stop((rthdata*)img->rth_ptr))
             return 0;
@@ -186,7 +119,6 @@ int fractal_mpfr_calculate_line(image_info* img, int line)
     int img_width = img->real_width;
     int* raw_data = &img->raw_data[line * img_width];
 
-    depth_t wz;
     depth_t depth = img->depth;
 
     mpfr_t  x,      y;
@@ -252,24 +184,41 @@ int fractal_mpfr_calculate_line(image_info* img, int line)
             mpfr_set(   wre2,   x2,             GMP_RNDN);
             mpfr_set(   wim2,   y2,             GMP_RNDN);
 
-            switch (img->fr_type)
+            switch (img->family)
             {
-            case MANDELBROT:
+            case FAMILY_MANDEL:
                 mpfr_set(c_re,  x,  GMP_RNDN);
                 mpfr_set(c_im,  y,  GMP_RNDN);
                 break;
-            case JULIA:
+            case FAMILY_JULIA:
                 mpfr_set(c_re,  img->u.julia.c_re,  GMP_RNDN);
                 mpfr_set(c_im,  img->u.julia.c_im,  GMP_RNDN);
                 break;
             }
-
-            *raw_data = frac_mandel_mpfr(depth, t1, frs_bail,
-                                                wim, wre,
-                                                c_im, c_re,
-                                                wim2, wre2  );
+            switch(img->fractal)
+            {
+            case BURNING_SHIP:
+                *raw_data = frac_burning_ship_mpfr(
+                                                depth, frs_bail,
+                                                    wim, wre,
+                                                    c_im, c_re,
+                                                    wim2, wre2, t1);
+                break;
+            case GENERALIZED_CELTIC:
+                *raw_data = frac_generalized_celtic_mpfr(
+                                                depth, frs_bail,
+                                                    wim, wre,
+                                                    c_im, c_re,
+                                                    wim2, wre2, t1);
+                break;
+            case MANDELBROT:
+            default:
+                *raw_data = frac_mandel_mpfr(depth, frs_bail,
+                                                    wim, wre,
+                                                    c_im, c_re,
+                                                    wim2, wre2, t1);
+            }
         }
-
         if (rth_render_should_stop((rthdata*)img->rth_ptr))
         {
             ret = 0;
@@ -294,7 +243,6 @@ int fractal_mpfr_calculate_line(image_info* img, int line)
 }
 
 
-#ifdef WITH_GMP
 int fractal_gmp_calculate_line(image_info* img, int line)
 {
     int ret = 1;
@@ -304,7 +252,6 @@ int fractal_gmp_calculate_line(image_info* img, int line)
     int img_width = img->real_width;
     int* raw_data = &img->raw_data[line * img_width];
 
-    depth_t wz;
     depth_t depth = img->depth;
 
     mpf_t  x,      y;
@@ -370,24 +317,41 @@ int fractal_gmp_calculate_line(image_info* img, int line)
             mpf_set(   wre2,   x2);
             mpf_set(   wim2,   y2);
 
-            switch (img->fr_type)
+            switch (img->family)
             {
-            case MANDELBROT:
+            case FAMILY_MANDEL:
                 mpf_set(c_re,  x);
                 mpf_set(c_im,  y);
                 break;
-            case JULIA:
-//                mpf_set(c_re,  img->u.julia.c_re);
-  //              mpf_set(c_im,  img->u.julia.c_im);
+            case FAMILY_JULIA:
+                mpfr_to_gmp(img->u.julia.c_re, c_re);
+                mpfr_to_gmp(img->u.julia.c_im, c_im);
                 break;
             }
-
-            *raw_data = frac_mandel_gmp(depth,  frs_bail, t1,
-                                                wim, wre,
-                                                c_im, c_re,
-                                                wim2, wre2  );
+            switch(img->fractal)
+            {
+            case BURNING_SHIP:
+                *raw_data = frac_burning_ship_gmp(
+                                                depth, frs_bail,
+                                                    wim, wre,
+                                                    c_im, c_re,
+                                                    wim2, wre2, t1);
+                break;
+            case GENERALIZED_CELTIC:
+                *raw_data = frac_generalized_celtic_gmp(
+                                                depth,  frs_bail,
+                                                    wim, wre,
+                                                    c_im, c_re,
+                                                    wim2, wre2, t1);
+                break;
+            case MANDELBROT:
+            default:
+                *raw_data = frac_mandel_gmp(depth,  frs_bail,
+                                                    wim, wre,
+                                                    c_im, c_re,
+                                                    wim2, wre2, t1);
+            }
         }
-
         if (rth_render_should_stop((rthdata*)img->rth_ptr))
         {
             ret = 0;
@@ -410,4 +374,3 @@ int fractal_gmp_calculate_line(image_info* img, int line)
     mpf_clear(t1);
     return ret;
 }
-#endif /* WITH_GMP */

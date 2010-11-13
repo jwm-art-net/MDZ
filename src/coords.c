@@ -6,10 +6,6 @@
 
 #include "cmdline.h"
 #include "debug.h"
-
-
-#ifdef WITH_GMP
-
 #include "my_mpfr_to_str.h"
 
 void mpfr_to_gmp(mpfr_t from, mpf_t to)
@@ -20,8 +16,6 @@ void mpfr_to_gmp(mpfr_t from, mpf_t to)
     printf("%s\n",str);
     free(str);
 }
-
-#endif
 
 
 static void coords_mpfr_clear(coords* c);
@@ -206,6 +200,8 @@ void coords_reset(coords* c)
 
 void coords_set_precision(coords* c, mpfr_prec_t precision)
 {
+    mpf_t test;
+
     if (precision < DEFAULT_PRECISION)
         precision = DEFAULT_PRECISION;
 
@@ -221,6 +217,11 @@ void coords_set_precision(coords* c, mpfr_prec_t precision)
 
     c->precision = precision;
     c->size = (c->aspect > 1.0) ? &c->width : &c->height;
+
+    mpf_init2(test, precision);
+    c->gmp_precision = mpf_get_prec(test);
+    printf("gmp precision:%ld\n", c->gmp_precision);
+    mpf_clear(test);
 }
 
 
@@ -306,7 +307,6 @@ void coords_get_rect(coords* c, mpfr_t xmin, mpfr_t xmax,
 }
 
 
-#ifdef WITH_GMP
 void coords_get_rect_gmp(coords* c, mpf_t xmin, mpf_t xmax,
                                     mpf_t ymax, mpf_t width)
 {
@@ -316,7 +316,6 @@ void coords_get_rect_gmp(coords* c, mpf_t xmin, mpf_t xmax,
     mpfr_to_gmp(c->ymax, ymax);
     mpfr_to_gmp(c->width, width);
 }
-#endif
 
 
 void coords_set_rect(coords* c, mpfr_t xmin, mpfr_t xmax, mpfr_t ymax)
@@ -464,7 +463,6 @@ void precision_change(mpfr_t x, mp_prec_t p)
 }
 
 
-#ifdef WITH_GMP
 void precision_change_gmp(mpf_t x, mp_bitcnt_t p)
 {
     mpf_t tmp;
@@ -476,7 +474,6 @@ void precision_change_gmp(mpf_t x, mp_bitcnt_t p)
 
     mpf_clear(tmp);
 }
-#endif
 
 
 static void coords_mpfr_clear(coords* c)

@@ -10,6 +10,8 @@
 #include "colour_gui.h"
 #include "coords_gui.h"
 #include "debug.h"
+#include "fractal.h"
+#include "fractset_gui.h"
 #include "image_info_gui.h"
 #include "main.h"
 #include "misc_gui.h"
@@ -35,6 +37,7 @@ GtkWidget* window =         NULL;
 coords_dialog* coords_dlg = NULL;
 palette_gui*  palgui =      NULL;
 
+static fracset_dialog* fracgui = NULL;
 
 static int gui_idle_draw_id;
 
@@ -86,6 +89,7 @@ static void do_reset_zoom(void);
 static void toggle_zoom_new_win(GtkWidget* widget);
 
 static void do_pal_edit_dialog(void);
+static void do_fracset_dialog(void);
 
 
 void gui_sensitive_switch_menu(gboolean t)
@@ -129,8 +133,11 @@ void save_settings_cmd(void)
 
 void switch_fractal_type(void)
 {
-    if (img->fr_type == MANDELBROT && stat.action != STAT_JULIA_BROWSING)
+    if (img->family == FAMILY_MANDEL
+     && stat.action != STAT_JULIA_BROWSING)
+    {
         start_julia_browsing();
+    }
     else
     {
         image_info_switch_fractal(img, 0, 0);
@@ -376,6 +383,22 @@ void do_coords_dialog(void)
                        coords_dlg);
 }
 
+static void do_fracset_dialog(void)
+{
+    if (fracgui)
+        return;
+
+    fracset_dlg_new(&fracgui, img);
+
+    g_signal_connect(GTK_OBJECT(fracgui->ok_button), "clicked",
+                       G_CALLBACK(fracset_dlg_ok_cmd),
+                       fracgui);
+    g_signal_connect(GTK_OBJECT(fracgui->apply_button), "clicked",
+                       G_CALLBACK(fracset_dlg_apply_cmd),
+                       fracgui);
+}
+
+
 static void do_reset_zoom(void)
 {
     image_info_reset_view(img);
@@ -470,6 +493,7 @@ void create_menus(GtkWidget* vbox)
     menu = gtk_menu_new();
     menu_add(menu, "Save as PNG", save_png_cmd);
     menu_add(menu, NULL, NULL);
+    menu_add(menu, "Fractal",           do_fracset_dialog);
     menu_add(menu, "Attributes...",     do_image_info_dialog);
     menu_add(menu, "Coordinates...",    do_coords_dialog);
     menu_add(menu, NULL, NULL);
@@ -594,10 +618,8 @@ void gui_start_rendering(image_info* img)
     coords_get_rect(img->pcoords,   img->xmin, img->xmax,
                                     img->ymax, img->width);
 
-    #ifdef WITH_GMP
     coords_get_rect_gmp(img->pcoords,   img->gxmin, img->gxmax,
                                         img->gymax, img->gwidth);
-    #endif
 
     if (!img->j_pre)
     {
@@ -655,6 +677,7 @@ void gui_stop_rendering(image_info* img)
 void start_julia_browsing(void)
 {
     stat.action = STAT_JULIA_BROWSING;
+    j_pre->fractal = img->fractal;
     gtk_widget_show(j_pre_window);
     gtk_widget_set_sensitive(switch_menu_cmd, FALSE);
 
@@ -914,7 +937,7 @@ int gui_init(int* argc, char*** argv, image_info* img_)
 
     img = img_;
 
-    j_pre = image_info_create(JULIA);
+    j_pre = image_info_create(FAMILY_JULIA, MANDELBROT);
 
     stat.action = STAT_NORMAL;
     stat.ptr_in_drawable = 0;

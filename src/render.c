@@ -33,10 +33,8 @@ int render_to_file(image_info* img)
 
     coords_get_rect(img->pcoords,   img->xmin, img->xmax,
                                     img->ymax, img->width);
-    #ifdef WITH_GMP
     coords_get_rect_gmp(img->pcoords,   img->gxmin, img->gxmax,
                                         img->gymax, img->gwidth);
-    #endif
 
     rth_ui_init(rth);
 

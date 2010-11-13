@@ -1,4 +1,4 @@
-VERSION :=0.0.9
+VERSION :=0.0.10
 
 PREFIX :=/usr/local
 BINDIR :=$(PREFIX)/bin
@@ -7,7 +7,7 @@ PROG := mdz
 
 CC := gcc
 
-DEFS := -Wall -Wextra -pedantic -std=gnu99 -DVERSION=\"$(VERSION)\" -DWITH_GMP
+DEFS := -Wall -Wextra -pedantic -std=gnu99 -DVERSION=\"$(VERSION)\"
 
 CFLAGS := $(DEFS) -O3 -fomit-frame-pointer -Winline
 
