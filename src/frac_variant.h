@@ -1,5 +1,5 @@
-#ifndef FRAC_BURNING_SHIP_H
-#define FRAC_BURNING_SHIP_H
+#ifndef FRAC_VARIANT_H
+#define FRAC_VARIANT_H
 
 
 #include <gmp.h>
@@ -9,13 +9,13 @@
 #include "types.h"
 
 
-depth_t frac_burning_ship(      depth_t depth,
+depth_t frac_variant(            depth_t depth,
                                 long double wim,     long double wre,
                                 long double c_im,    long double c_re,
                                 long double wim2,    long double wre2  );
 
 
-depth_t frac_burning_ship_mpfr(
+depth_t frac_variant_mpfr(
                                 depth_t depth,
                                 mpfr_t bail,
                                 mpfr_t wim,     mpfr_t wre,
@@ -23,7 +23,7 @@ depth_t frac_burning_ship_mpfr(
                                 mpfr_t wim2,    mpfr_t wre2, mpfr_t t1);
 
 
-depth_t frac_burning_ship_gmp(
+depth_t frac_variant_gmp(
                                 depth_t depth,
                                 mpf_t bail,
                                 mpf_t wim,     mpf_t wre,

@@ -12,7 +12,7 @@ mdz has stripped out most of the features from gkII and improves
 performance with multi-threaded rendering, and adds the ability to
 zoom really deep with multi-precision math.
 
-the code of mdz-0.0.9 is now a significant departure from gkII.
+the code since mdz-0.0.9 is a significant departure from gkII.
 
 
 Command Line Options
@@ -28,34 +28,51 @@ something sufficiently interesting has been located in the explorer.
 Multi-Precision Maths Routines
 -------------------------------
 
-By default the multi-precision maths routines are turned off. This means
-you must turn them on when needed. There are two ways to find out when you
-need to turn them on. The first is just to look at the rendered image.
-If it appears to be composed of clunky blocks instead of tiny pixels then 
-the multi-precision maths routines need activating.
+Usually software takes advantage of the CPU's floating point 
+routines to calculate mathematic functions. However, when 
+exploring the infinite complexity of fractals, the CPU is barely 
+able to prick a hole in the wall of a soap bubble.
 
-Activate the multi-precision maths routines via the attributes dialog.
+Multiple precision maths routines operating in software come to 
+the rescue. You will know when you need them because MDZ starts 
+rendering bulky blocks of colour instead of pixels.
 
-You will also encounter clunky blocks even with the multi-precision maths
-routines active. This is because mdz does not automatically set how much
-precision the multi-precision maths routines use, you must choose a value
-yourself.
+By default the multi-precision maths routines in MDZ are turned 
+off. They are activated by selecting the "Multiple Precision Math" 
+checkbox in the attributes dialog.
 
-However, mdz does calculate a value which is the scant minimum amount of
-precision you could get away with to render an image. The scant minimum
-value only provides enough precision for poor quality renders so choose
-always choose a higher value for final renders.
+To start with, the precision is set to 80 bits. You will need to 
+increase this setting as you zoom in to prevent the clunky blocks 
+appearing again.
 
+The multi-precision maths routines have an option for "Correct 
+Rounding" which when selected enables the more precise but slower 
+multi-precision maths routines based on MPFR. Without "Correct 
+Rounding" selected, the GMP multi-precision maths routines are 
+used which are slightly faster than MPFR.
 
-WARNING: the arbitrary maths routines slow rendering to a crawl and
-the deeper you zoom, and the more precision you ask for, the slower the
-calculations will become.
+Using GMP (multi-precision without correct rounding) the precision 
+setting is a minimum number of bits. The actual number of bits of 
+precision in use are displayed alongside the legend "Non-rounding 
+precision". The "Non-rounding precision" is how many bits of 
+precision are used by the maths routines for storing the result 
+and for calculating the result. On my 64 bit system the 
+non-rounding precision is always a multiple of 64.
 
-To counter this, reduce the image size down to 240 x 180 until you have
-located your image and then save the settings (first making sure you have
-set the precision above the scant minimum). You can then render the image
-from the commandline specifying how large it should be and anti-aliasing
-options etc.
+Using MPFR, the precision setting is exactly how many bits of 
+precision to use for storing the result. MPFR may realize it needs 
+to calculate using more precision so that the result is correct.
+
+The coordinates system of MDZ always uses MPFR for calculations, 
+but the amount of precision in use by the coordinates system is 
+always the number of bits as specified by the "Non-rounding 
+precision" which is nearly always greater than the precision 
+setting.
+
+As the multi-precision maths routines are much slower than 
+hardware floating point calculations it is recommended to reduce 
+the image size to 240 x 180 while exploring until you find an 
+image you want to render at a larger size.
 
 
 Multi-threading
@@ -85,18 +102,4 @@ Colour Cycling and Anti-Aliasing
 without anti-aliasing, there are no problems with colour cycling. with
 anti-aliasing, don't be surprised if the palette display does not update
 in time with the cycling. general rule of thumb: don't push it ;-)
-
-
-
-mdz development
-----------------
-
-It is currently not planned for mdz to render anything than the Mandelbrot
-and Julia sets. Nor are any fanciful colouring methods (perhaps the smooth
-colouring variant).
-
-mdz is supposed to be a tool for exploring the Mandelbrot set without too
-many distractions - it is believed by the author that the Mandelbrot Set 
-is sufficiently complex that it should be possible to find interesting 
-images within it that do not require fanciful colouring methods.
 

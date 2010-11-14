@@ -5,8 +5,7 @@ mdz Installation
 You need development versions of the following libraries:
 
  * GTK2
- * libpng 1.0.3. 1.0.3 has a crucial bug-fix so earlier versions don't work.
- * libpng requires zlib. 1.1.2 works for me.
+ * libpng 
  * pkg-config
  * mpfr
  * pthreads

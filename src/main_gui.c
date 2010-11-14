@@ -493,8 +493,8 @@ void create_menus(GtkWidget* vbox)
     menu = gtk_menu_new();
     menu_add(menu, "Save as PNG", save_png_cmd);
     menu_add(menu, NULL, NULL);
-    menu_add(menu, "Fractal",           do_fracset_dialog);
     menu_add(menu, "Attributes...",     do_image_info_dialog);
+    menu_add(menu, "Fractal",           do_fracset_dialog);
     menu_add(menu, "Coordinates...",    do_coords_dialog);
     menu_add(menu, NULL, NULL);
     switch_menu_cmd = menu_add(menu, "Switch fractal type",

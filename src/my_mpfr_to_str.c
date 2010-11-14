@@ -59,7 +59,7 @@ char* my_mpfr_to_str(mpfr_t n)
     if (e)
     {
         *d++ = 'e';
-        sprintf(d, "%ld", (long) e);
+        d += sprintf(d, "%ld", (long) e);
     }
 
     *d='\0'; /* <-- oooh mummy */

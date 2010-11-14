@@ -197,8 +197,15 @@ void palette_gui_new(palette_gui** ptr, image_info* img)
     gtk_box_pack_start(GTK_BOX(vbox), pg->notebook, FALSE, FALSE, 0);
 
 
-    /* colour cycling */
+    /* randomize button */
+    tmp = gtk_button_new_with_label("Randomize");
+    g_signal_connect(GTK_OBJECT(tmp), "clicked",
+                        G_CALLBACK(palette_rnd_dlg_apply),
+                            pg->pal_randomize);
+    gtk_box_pack_start(GTK_BOX(vbox), tmp, TRUE, TRUE, 0);
+    pg->randomize = tmp;
 
+    /* colour cycling */
     hbox = gtk_hbox_new(FALSE, 0);
     gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
 

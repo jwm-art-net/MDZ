@@ -124,6 +124,27 @@ bool setting_get_long(  const char* buf,   const char* name,
 }
 
 
+bool setting_get_version(const char* buf,   int* major,
+                                            int* minor,
+                                            int* revision)
+{
+    int r, maj, min, rev;
+    setlocale(LC_NUMERIC, "C");
+    r = sscanf(buf, "%d.%d.%d", &maj, &min, &rev);
+    setlocale(LC_NUMERIC, sysloc);
+
+    if (r == 3)
+    {
+        *major = maj;
+        *minor = min;
+        *revision = rev;
+        return true;
+    }
+
+    return false;
+}
+
+
 bool setting_get_double(  const char* buf,   const char* name,
                             double* val,    double min,    double max)
 {

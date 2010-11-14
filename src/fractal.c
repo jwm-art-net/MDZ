@@ -5,11 +5,12 @@
 #include "frac_mandel.h"
 #include "frac_burning_ship.h"
 #include "frac_generalized_celtic.h"
+#include "frac_variant.h"
 
 
 const char* family_str[FAMILY_XXX_LAST] =
 {
-    "mandel",
+    "mandelbrot",
     "julia",
     0
 };
@@ -20,6 +21,7 @@ const char* fractal_str[FRACTAL_XXX_LAST] =
     "mandelbrot",
     "burning ship",
     "generalized celtic",
+    "variant",
     0
 };
 
@@ -93,6 +95,11 @@ int fractal_calculate_line(image_info* img, int line)
                 break;
             case GENERALIZED_CELTIC:
                 *raw_data = frac_generalized_celtic(depth,  wim, wre,
+                                                c_im, c_re,
+                                                wim2, wre2);
+                break;
+            case VARIANT:
+                *raw_data = frac_variant(depth,  wim, wre,
                                                 c_im, c_re,
                                                 wim2, wre2);
                 break;
@@ -206,6 +213,13 @@ int fractal_mpfr_calculate_line(image_info* img, int line)
                 break;
             case GENERALIZED_CELTIC:
                 *raw_data = frac_generalized_celtic_mpfr(
+                                                depth, frs_bail,
+                                                    wim, wre,
+                                                    c_im, c_re,
+                                                    wim2, wre2, t1);
+                break;
+            case VARIANT:
+                *raw_data = frac_variant_mpfr(
                                                 depth, frs_bail,
                                                     wim, wre,
                                                     c_im, c_re,
@@ -340,6 +354,13 @@ int fractal_gmp_calculate_line(image_info* img, int line)
             case GENERALIZED_CELTIC:
                 *raw_data = frac_generalized_celtic_gmp(
                                                 depth,  frs_bail,
+                                                    wim, wre,
+                                                    c_im, c_re,
+                                                    wim2, wre2, t1);
+                break;
+            case VARIANT:
+                *raw_data = frac_variant_gmp(
+                                                depth, frs_bail,
                                                     wim, wre,
                                                     c_im, c_re,
                                                     wim2, wre2, t1);

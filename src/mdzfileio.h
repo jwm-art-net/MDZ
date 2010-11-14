@@ -25,6 +25,10 @@ struct mdzfile
     bool write;
     bool eof;
     char* test;
+
+    int version_maj;
+    int version_min;
+    int version_rev;
 };
 
 

@@ -201,8 +201,27 @@ void duplicate(void)
 
     if (result == 0)
     {
+        char width[80];
+        char threads[80];
+        char aa[80];
+
         gui_close_display();
-        execlp(program_name, program_name, "--"DUMP_COMMAND, fname, NULL);
+        snprintf(width, 80, "%d", img->user_width);
+        snprintf(aa, 80, "%d", img->aa_factor);
+        snprintf(threads, 80, "%d", img->thread_count);
+/*
+        printf("%s %s %s %s %s %s %s %s %s\n", program_name,
+                    "--read-dump-from", fname,
+                    "--width",          width,
+                    "--anti-alias",     aa,
+                    "--threads",        threads);
+*/
+        execlp(program_name, program_name,
+                    "--read-dump-from", fname,
+                    "--width",          width,
+                    "--anti-alias",     aa,
+                    "--threads",        threads,
+                    NULL);
         perror("Error while exec'ing program\n");
         return;
     }

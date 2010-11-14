@@ -3,9 +3,6 @@
 #include "misc_gui.h"
 
 
-static void set_rnd_palette(GtkWidget* widget, palette_rnd_dialog* dl);
-
-
 static void channel(const char* label, GtkWidget* container,
                         GtkWidget** str_w, double str_v,
                         GtkWidget** bnd_w, double bnd_v)
@@ -60,14 +57,6 @@ void palette_rnd_dlg_new(palette_rnd_dialog** ptr, image_info* img)
     dl->pa = pal_affect_new(dl->box,    &dl->img->rnd_pal->offset,
                                         &dl->img->rnd_pal->stripe,
                                         &dl->img->rnd_pal->spread);
-
-    dl->apply_button = gtk_button_new_with_label("Randomize");
-    g_signal_connect(GTK_OBJECT(dl->apply_button), "clicked",
-                     G_CALLBACK(set_rnd_palette),
-                     dl);
-    gtk_box_pack_start(GTK_BOX(vbox), dl->apply_button, TRUE, TRUE, 0);
-    gtk_widget_show(dl->apply_button);
-
     gtk_widget_show_all(dl->box);
 }
 
@@ -86,7 +75,7 @@ void palette_rnd_dlg_set(random_palette* rp, palette_rnd_dialog* dl)
 }
 
 
-static void set_rnd_palette(GtkWidget* widget, palette_rnd_dialog* dl)
+void palette_rnd_dlg_apply(GtkWidget* widget, palette_rnd_dialog* dl)
 {
     (void)widget;
     dl->img->rnd_pal->r_strength =

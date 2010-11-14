@@ -29,4 +29,8 @@ bool    setting_get_double( const char* buf,    const char* name,
 bool    setting_get_mpfr_t( const char* buf, const char* name,
                                                         mpfr_t val);
 
+bool    setting_get_version(const char* buf,    int* major,
+                                                int* minor,
+                                                int* revision);
+
 #endif

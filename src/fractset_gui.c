@@ -15,7 +15,6 @@ enum {
 };
 
 
-static void update_fracset_dialog(GtkWidget* widget, fracset_dialog* fsd);
 static void fracset_dlg_destroy(GtkWidget* widget, fracset_dialog* fsd);
 static GtkWidget* create_fracset_param( GtkListStore* plist,
                                         int initial_item );
@@ -130,6 +129,7 @@ void fracset_dlg_ok_cmd(GtkWidget* w, fracset_dialog* dl)
 
 void fracset_dlg_apply_cmd(GtkWidget* w,fracset_dialog* dl)
 {
+    (void)w;
     get_fractal_settings(dl, dl->img);
     gui_start_rendering(dl->img);
 }

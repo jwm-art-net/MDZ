@@ -21,6 +21,8 @@ typedef struct
     GtkWidget* funcs_label;
     GtkWidget* randz_label;
 
+    GtkWidget*  randomize;
+
     /* palette cycling */
     GtkWidget* cycle_fwd_button;
     GtkWidget* cycle_rev_button;

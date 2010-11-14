@@ -17,8 +17,6 @@ typedef struct
     GtkWidget* g_bands;
     GtkWidget* b_bands;
 
-    GtkWidget* apply_button;
-
     pal_affect* pa;
 
     image_info* img;
@@ -35,5 +33,8 @@ typedef struct
 
 void palette_rnd_dlg_new(palette_rnd_dialog** ptr, image_info* img);
 void palette_rnd_dlg_set(random_palette* rp, palette_rnd_dialog* dl);
+
+
+void palette_rnd_dlg_apply(GtkWidget* widget, palette_rnd_dialog* dl);
 
 #endif

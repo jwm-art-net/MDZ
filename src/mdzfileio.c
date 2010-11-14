@@ -39,7 +39,6 @@ bool mdzfile_read(mdzfile* mf)
 {
     if (mf->eof || mf->write)
         return false;
-
     do
     {
         if (mf->test)
@@ -66,18 +65,20 @@ bool mdzfile_read(mdzfile* mf)
 }
 
 
-bool mdzfile_test_for_name(mdzfile* mf, const char* str)
+bool mdzfile_test_for_name(mdzfile* mf, const char* name)
 {
-    if (!mdzfile_read(mf))
+    size_t nlen = 0;
+
+    if (!mdzfile_read(mf)){printf("bloo!\n");
+        return false;}
+
+    nlen = strlen(name);
+    mf->test = strdup(mf->line);
+
+    if (strlen(mf->line) < nlen + 2 || strncmp(name, mf->line, nlen))
         return false;
 
-    mf->test = malloc(strlen(mf->line) + 1);
-    strcpy(mf->test, mf->line);
-
-    if (strcmp(mf->test, str)== 0)
-        return true;
-
-    return false;
+    return true;
 }
 
 
@@ -102,6 +103,8 @@ int mdzfile_err(mdzfile* mf, const char* msg)
 mdzfile* mdzfile_read_open(const char* filename)
 {
     int i;
+    size_t hlen = strlen(mdzfile_header);
+    char* version;
     FILE* f = fopen(filename, "r");
 
     if (!f)
@@ -149,9 +152,25 @@ mdzfile* mdzfile_read_open(const char* filename)
     if (!mdzfile_read(mf))
         return 0;
 
-    if (strcmp(mf->line, mdzfile_header))
+    if (strncmp(mf->line, mdzfile_header, hlen))
     {
         mdzfile_err(mf, "not a recognisable mdz file\n");
+        return 0;
+    }
+
+    version = mf->line + hlen;
+
+    while (*version == ' ')
+        ++version;
+
+    if (*version == '\0')
+        version = "0.0.8";
+
+    if (!setting_get_version(version,   &mf->version_maj,
+                                        &mf->version_min,
+                                        &mf->version_rev ))
+    {
+        mdzfile_err(mf, "error in mdz file header/version\n");
         return 0;
     }
 

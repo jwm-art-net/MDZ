@@ -1,6 +1,7 @@
 #include "coords.h"
 
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 
@@ -8,12 +9,11 @@
 #include "debug.h"
 #include "my_mpfr_to_str.h"
 
+
 void mpfr_to_gmp(mpfr_t from, mpf_t to)
 {
     char* str = my_mpfr_to_str(from);
     mpf_set_str (to, str, 10);
-
-    printf("%s\n",str);
     free(str);
 }
 
@@ -205,6 +205,12 @@ void coords_set_precision(coords* c, mpfr_prec_t precision)
     if (precision < DEFAULT_PRECISION)
         precision = DEFAULT_PRECISION;
 
+    mpf_init2(test, precision);
+    c->gmp_precision = mpf_get_prec(test);
+
+    if ((unsigned long)c->gmp_precision > (unsigned long)precision)
+        precision = c->gmp_precision;
+
     precision_change(c->xmin,   precision);
     precision_change(c->xmax,   precision);
     precision_change(c->ymin,   precision);
@@ -218,9 +224,6 @@ void coords_set_precision(coords* c, mpfr_prec_t precision)
     c->precision = precision;
     c->size = (c->aspect > 1.0) ? &c->width : &c->height;
 
-    mpf_init2(test, precision);
-    c->gmp_precision = mpf_get_prec(test);
-    printf("gmp precision:%ld\n", c->gmp_precision);
     mpf_clear(test);
 }
 

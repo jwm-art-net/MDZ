@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 
-#define DUMP_COMMAND "read-dump-from"
 
 typedef struct
 {

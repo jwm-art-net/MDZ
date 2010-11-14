@@ -1,10 +1,8 @@
-#include "frac_generalized_celtic.h"
-
+#include "frac_variant.h"
 
 #include <math.h>
 
-
-depth_t frac_burning_ship(      depth_t depth,
+depth_t frac_variant(            depth_t depth,
                                 long double wim,     long double wre,
                                 long double c_im,    long double c_re,
                                 long double wim2,    long double wre2  )
@@ -12,19 +10,20 @@ depth_t frac_burning_ship(      depth_t depth,
     depth_t wz;
     for (wz = 1; wz <= depth; ++wz)
     {
-        wim = 2.0 * fabsl(wre * wim) + c_im;
-        wre = wre2 - wim2 + c_re;
+        wim = 2.0 * wre * wim + c_im;
+        if (wz % 2)
+            wre = fabsl(wre2 - wim2) + c_re;
+        else
+            wre = wre2 - wim2 + c_re;
         wim2 = wim * wim;
         wre2 = wre * wre;
-
         if (wim2 + wre2 > 4.0F)
             return wz;
     }
     return 0;
 }
 
-
-depth_t frac_burning_ship_mpfr(
+depth_t frac_variant_mpfr(
                                 depth_t depth,
                                 mpfr_t bail,
                                 mpfr_t wim,     mpfr_t wre,
@@ -36,11 +35,12 @@ depth_t frac_burning_ship_mpfr(
     {
         /* wim = 2.0 * wre * wim + c_im; */
         mpfr_mul(   t1,     wre,    wim,    GMP_RNDN);
-        mpfr_abs(   t1,     t1,             GMP_RNDN);
         mpfr_mul_si(t1,     t1,     2,      GMP_RNDN);
         mpfr_add(   wim,    t1,     c_im,   GMP_RNDN);
         /* wre = wre2 - wim2 + c_re; */
         mpfr_sub(   t1,     wre2,   wim2,   GMP_RNDN);
+        if (wz % 2)
+            mpfr_abs(t1, t1, GMP_RNDN);
         mpfr_add(   wre,    t1,     c_re,   GMP_RNDN);
         /* wim2 = wim * wim; */
         mpfr_mul(   wim2,   wim,    wim,    GMP_RNDN);
@@ -55,7 +55,7 @@ depth_t frac_burning_ship_mpfr(
 }
 
 
-depth_t frac_burning_ship_gmp(
+depth_t frac_variant_gmp(
                                 depth_t depth,
                                 mpf_t bail,
                                 mpf_t wim,     mpf_t wre,
@@ -67,11 +67,12 @@ depth_t frac_burning_ship_gmp(
         {
         /* wim = 2.0 * wre * wim + c_im; */
         mpf_mul(   t1,     wre,    wim);
-        mpf_abs(   t1,     t1);
         mpf_mul_ui(t1,     t1,     2);
         mpf_add(   wim,    t1,     c_im);
         /* wre = wre2 - wim2 + c_re; */
         mpf_sub(   t1,     wre2,   wim2);
+        if (wz % 2)
+            mpf_abs(t1, t1);
         mpf_add(   wre,    t1,     c_re);
         /* wim2 = wim * wim; */
         mpf_mul(   wim2,   wim,    wim);

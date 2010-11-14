@@ -13,7 +13,7 @@
 #include "types.h"
 
 
-#define MIN_PRECISION       1
+#define MIN_PRECISION       2
 #define MAX_PRECISION       99999999
 
 #define MIN_DEPTH           1

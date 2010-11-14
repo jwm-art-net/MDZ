@@ -19,6 +19,7 @@ enum
     MANDELBROT,
     BURNING_SHIP,
     GENERALIZED_CELTIC,
+    VARIANT,
 /* ----- leave last ------ */
     FRACTAL_NULL,
     FRACTAL_XXX_LAST

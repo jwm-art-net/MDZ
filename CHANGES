@@ -1,4 +1,51 @@
 -------------------------------------------
+mdz-0.1.0
+
+NEW FEATURES:
+
+* Three new fractal types, Burning Ship, Generalized
+  Celtic, and Variant. See README.
+
+* New Correct Rounding option - when not
+  set uses slightly faster multi-precision
+  maths routines than previous versions.
+  (ie it uses GMP instead of MPFR). See README.
+
+CHANGES:
+
+* Added non-rounding precision label in Attributes
+  dialog. See README.
+
+* MDZ settings files created with mdz-0.1.0 are
+  not compatible with older versions of MDZ, but
+  older files are still readable with mdz-0.1.0.
+
+* Randomize button is now always visibile (I'm
+  trialling this, please give feedback)
+
+FIXES:
+
+* Increased minimum precision to 2 bits to prevent
+  MPFR assertion failure ;-)
+
+* Palette offset setting in MDZ files no longer
+  ignored.
+
+* Image dimensions, anti-aliasing, and thread count
+  not lost in new instance created by duplicate and
+  zoom-in-new-window menu commands.
+
+* Loading of an MDZ settings file no longer resets
+  anti-aliasing.
+
+* Fix in mdz file test-read routine which was
+  previously non-apparent.
+
+* Fix for my_mpfr_to_str routine (for older versions
+  of MPFR) to include exponent in output string.
+  
+
+-------------------------------------------
 mdz-0.0.9
 
 

@@ -1,20 +1,7 @@
-Todo RIGHT AT THIS VERY MOMENT!
-
- * Testing GMP rendering speeds over MPFR rendering speeds.
-   GMP seems faster. May keep GMP rendering as an option.
-
-
-Todo currently:
-
- * When zoom-in-new window or duplicate is used the following settings
-   should be transferred to the new instance:
-        * palette offset
-        * image dimension
-    (currently these settings are 'forgotten').
 
 Todo for consideration:
 
- * investigate smooth colouring
+ * investigate smooth colouring (instead of colour-bands)
  * investigate guessing algorithm + zoom optimization
 
 Todo long term:

@@ -13,7 +13,7 @@
 options opts;
 
 static struct option longopts[] = {
-    {   DUMP_COMMAND,       HAS_ARG,    0,  'd' },
+    {   "read-dump-from",   HAS_ARG,    0,  'd' },
     {   "load-settings",    HAS_ARG,    0,  'l' },
     {   "load-palette",     HAS_ARG,    0,  'P' },
     {   "random-palette",   0,          0,  'p' },
@@ -124,7 +124,7 @@ int process_args(int argc, char** argv)
 
         case 'w':
             opts.width = atoi(optarg);
-            if (opts.width < 1 || opts.width > MAX_WIDTH)
+            if (opts.width < 2 || opts.width > MAX_WIDTH)
             {
                 fprintf(stderr, "width out of range 1 ~ %d", MAX_WIDTH);
                 return -1;
@@ -133,7 +133,7 @@ int process_args(int argc, char** argv)
 
         case 'h':
             opts.height = atoi(optarg);
-            if (opts.height < 1 || opts.height > MAX_WIDTH)
+            if (opts.height < 2 || opts.height > MAX_HEIGHT)
             {
                 fprintf(stderr, "height out of range 1 ~ %d", MAX_HEIGHT);
                 return -1;
@@ -153,7 +153,7 @@ int process_args(int argc, char** argv)
             opts.antialias = atoi(optarg);
             if (opts.antialias < 1 || opts.antialias > MAX_AA)
             {
-                fprintf(stderr, "anti-alias out of range 1 ~ %d", MAX_HEIGHT);
+                fprintf(stderr, "anti-alias out of range 1 ~ %d", MAX_AA);
                 return -1;
             }
             break;

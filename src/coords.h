@@ -15,6 +15,9 @@ int mpfr_div_d(mpfr_t rop, mpfr_t op1, double _op2, mpfr_rnd_t rnd);
 int mpfr_mul_d(mpfr_t rop, mpfr_t op1, double _op2, mpfr_rnd_t rnd);
 #endif
 
+#if __GNU_MP_VERSION < 5
+typedef unsigned long mp_bitcnt_t;
+#endif
 
 void mpfr_to_gmp(mpfr_t from, mpf_t to);
 void precision_change(mpfr_t x, mp_prec_t p);
