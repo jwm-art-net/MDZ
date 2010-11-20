@@ -20,6 +20,8 @@ depth_t frac_mandel(            depth_t depth,
     return 0;
 }
 
+
+
 depth_t frac_mandel_mpfr(
                                 depth_t depth,
                                 mpfr_t bail,

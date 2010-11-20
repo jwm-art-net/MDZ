@@ -1,4 +1,23 @@
 -------------------------------------------
+mdz-0.1.1
+
+CHANGES
+
+* PNG images are now always saved in the RGB format.
+  This solves the problem of the inside-colour being
+  black in MDZ but some other colour if the image was
+  saved without colour-interpolation or anti-aliasing,
+  as well as the palette offset bug in saved images.
+
+* Renamed 'variant' fractal type to 'mandel-celtic-hybrid'.
+
+* Added a couple of example colour palettes saved in
+  .map format in gallery/.
+
+* Added a couple of mandel-celtic hybrid example settings
+  files in gallery/.
+
+-------------------------------------------
 mdz-0.1.0
 
 NEW FEATURES:

@@ -1,6 +1,6 @@
-Known bugs:
+Occasionally after changing image dimensions and/or anti-aliasing
+rendering either does not start or it freezes, and the progress bar
+shows an incorrect reading. Most definitely something to do with the
+multi-threading, but as it's a very rare problem, I've not looked
+into it yet.
 
- * within the mdz gui, the M-set inside colour is always
-   drawn as black, but unless anti-aliasing or colour-scaling
-   is set, the inside colour in the saved PNG image file is
-   as the first indexed colour in the colour map.

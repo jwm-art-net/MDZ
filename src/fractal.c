@@ -21,7 +21,7 @@ const char* fractal_str[FRACTAL_XXX_LAST] =
     "mandelbrot",
     "burning ship",
     "generalized celtic",
-    "variant",
+    "mandel-celtic hybrid",
     0
 };
 

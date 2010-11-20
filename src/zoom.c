@@ -175,6 +175,7 @@ void zoom_in(void)
 
     if (img->zoom_new_win == TRUE)
     {
+        zoom_gui_draw_zoom_box();
         duplicate();
         coords_cpy(img->pcoords, c);
         coords_free(c);
