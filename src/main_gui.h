@@ -49,12 +49,12 @@ typedef struct
 
 
 
-extern image_info*  j_pre;
-extern status_info  stat;
-extern GtkWidget*   drawing_area;
-extern GtkWidget*   window;
-extern coords_dialog*       coords_dlg;
-extern palette_gui*  palgui;
+extern image_info*      j_pre;
+extern status_info      stat;
+extern GtkWidget*       drawing_area;
+extern GtkWidget*       window;
+extern coords_dialog*   coords_dlg;
+extern palette_gui*     palgui;
 
 
 int gui_init(int* argc, char*** argv, image_info* img);

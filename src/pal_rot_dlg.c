@@ -1,5 +1,6 @@
 #include <gdk/gdkkeysyms.h>
 #include "pal_rot_dlg.h"
+#include "main_gui.h"
 #include "main.h"
 
 gboolean cycle_fwd = TRUE;

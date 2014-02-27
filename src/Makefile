@@ -15,7 +15,7 @@ CFLAGS := $(DEFS) -O3 -fomit-frame-pointer -Winline
 #CFLAGS := $(DEFS) -O3 -fomit-frame-pointer -Winline -DWITH_TMZ_CMDLINE
 #CFLAGS := $(DEFS) -ggdb -DDEBUG
 
-LIBS   := -lpng -lz -lgmp -lmpfr -lpthread
+LIBS   := -lm -lpng -lz -lgmp -lmpfr -lpthread
 
 SRC    := $(wildcard *.c)
 OBJS   := $(patsubst %.c, %.o, $(SRC))

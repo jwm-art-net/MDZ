@@ -9,7 +9,7 @@
 
 #define DEFAULT_PALETTE "default.map"
 
-guint32* palette = NULL;
+//guint32* palette = NULL;
 
 int pal_offset = 0;
 int pal_indexes = 256;
