@@ -461,14 +461,18 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
         fractal = mdzfile_get_index(mf, "fractal", fractal_str);
         if (fractal == -1)
             return mdzfile_err(mf, "error in fractal setting");
-
-        if (mf->version_min >= 2) /* version 0.1.2 and above */
-            if (!mdzfile_get_long(mf, "bailout", &bailout, MIN_BAILOUT, MAX_BAILOUT))
-                return mdzfile_err(mf, "Error in bailout setting");
     }
 
     if (!mdzfile_get_long(mf, "depth", &depth, MIN_DEPTH, MAX_DEPTH))
         return mdzfile_err(mf, "Error in depth setting");
+
+    if (mf->version_min >= 1 && mf->version_rev >= 2) /* version 0.1.2 and above */
+    {
+        if (!mdzfile_get_long(mf, "bailout", &bailout, MIN_BAILOUT, MAX_BAILOUT))
+            return mdzfile_err(mf, "Error in bailout setting");
+    }
+    else
+        bailout = DEFAULT_BAILOUT;
 
     if (!mdzfile_get_double(mf, "aspect", &aspect, 1e-20f, 1e20f))
         return mdzfile_err(mf, "Error in aspect setting");
