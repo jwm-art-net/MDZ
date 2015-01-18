@@ -19,6 +19,9 @@
 #define MIN_DEPTH           1
 #define MAX_DEPTH           INT32_MAX
 
+#define MIN_BAILOUT         1
+#define MAX_BAILOUT         INT32_MAX
+
 #define DEFAULT_WIDTH       480
 #define DEFAULT_HEIGHT      360
 #define MAX_WIDTH           32767
@@ -73,6 +76,7 @@ typedef struct image_info
     coords* pcoords; /* used for updating coords */
 
     depth_t depth;
+    long bailout;
 
     int thread_count;
     int draw_lines;
@@ -86,7 +90,7 @@ typedef struct image_info
 
     random_palette* rnd_pal;    /* again... it's handy */
 
-    int real_width;             /* real size. differs from user_size */ 
+    int real_width;             /* real size. differs from user_size */
     int real_height;            /* if anti-aliasing is used */
     int user_width;
     int user_height;
