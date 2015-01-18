@@ -9,7 +9,7 @@
 #include "types.h"
 
 
-depth_t frac_mandel(            depth_t depth,
+depth_t frac_mandel(            depth_t depth,       long double bailout,
                                 long double wim,     long double wre,
                                 long double c_im,    long double c_re,
                                 long double wim2,    long double wre2  );

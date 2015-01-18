@@ -11,6 +11,7 @@
 #include <locale.h>
 
 #define DEFAULT_DEPTH           300
+#define DEFAULT_BAILOUT         4
 #define DEFAULT_COLOUR_SCALE    1.0
 
 
@@ -61,7 +62,7 @@ image_info * image_info_create(int family, int fractal)
     mpf_init2(  img->gymax, DEFAULT_PRECISION);
     mpf_init2(  img->gwidth, DEFAULT_PRECISION);
 
-    img->pcoords = coords_new(img->real_width, img->real_height,
+    img->pcoords = coords_new(img->real_width, img->real_height, img->bailout,
                                                    cx, cy, size);
     image_info_reset_view(img);
 
@@ -268,6 +269,7 @@ void image_info_set_precision(image_info * img, mpfr_prec_t precision)
 void image_info_reset_view(image_info* img)
 {
     img->depth =        DEFAULT_DEPTH;
+    img->bailout =      DEFAULT_BAILOUT;
 
     img->precision =    DEFAULT_PRECISION;
     img->colour_scale = DEFAULT_COLOUR_SCALE;
@@ -339,6 +341,7 @@ int image_info_save_settings(image_info * img, FILE* fd)
     fprintf(fd, "family %s\n",              family_str[img->family]);
     fprintf(fd, "fractal %s\n",             fractal_str[img->fractal]);
     fprintf(fd, "depth %ld\n",              img->depth);
+    fprintf(fd, "bailout %ld\n",            img->bailout);
     fprintf(fd, "aspect %0.20lf\n",         img->aspect);
     fprintf(fd, "colour-scale %0.20lf\n",   img->colour_scale);
 
@@ -426,6 +429,7 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
 {
     long precision;
     long depth;
+    long bailout;
     double aspect;
     int use_multi_prec;
     int use_rounding;
@@ -457,6 +461,12 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
         fractal = mdzfile_get_index(mf, "fractal", fractal_str);
         if (fractal == -1)
             return mdzfile_err(mf, "error in fractal setting");
+
+        if (mf->version_min >= 2) /* version 0.1.2 and above */
+            if (!mdzfile_get_long(mf, "bailout", &bailout, MIN_BAILOUT, MAX_BAILOUT))
+                return mdzfile_err(mf, "Error in bailout setting");'
+        else
+            bailout = DEFAULT_BAILOUT;
     }
 
     if (!mdzfile_get_long(mf, "depth", &depth, MIN_DEPTH, MAX_DEPTH))
@@ -581,6 +591,7 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
     img->family =       family;
     img->fractal =      fractal;
     img->depth =        depth;
+    img->bailout =      bailout;
     image_info_set_multi_prec(img, use_multi_prec, use_rounding);
     img->colour_scale = colsc;
     img->palette_ip =   colip;

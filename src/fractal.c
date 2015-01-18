@@ -43,6 +43,7 @@ int fractal_calculate_line(image_info* img, int line)
     long double wre,  wim;
     long double wre2, wim2;
     depth_t depth = img->depth;
+    depth_t bailout = img->bailout;
 
     long double xmin, xmax, ymax, width;
     long double j_c_re = 0, j_c_im = 0;
@@ -105,7 +106,7 @@ int fractal_calculate_line(image_info* img, int line)
                 break;
             case MANDELBROT:
             default:
-                *raw_data = frac_mandel(depth,  wim, wre,
+                *raw_data = frac_mandel(depth,  bailout, wim, wre,
                                                 c_im, c_re,
                                                 wim2, wre2);
             }
@@ -156,12 +157,12 @@ int fractal_mpfr_calculate_line(image_info* img, int line)
     mpfr_init2(img_xmin,img->precision);
     mpfr_init2(t1,      img->precision);
 
-    mpfr_set_si(frs_bail,   4,          GMP_RNDN);
-    mpfr_set_si(img_rw,     img_width,  GMP_RNDN);
-    mpfr_set(   img_xmin,   img->xmin,  GMP_RNDN);
-    mpfr_set(   width,      img->width, GMP_RNDN);
+    mpfr_set_si(frs_bail,   img->bailout, GMP_RNDN);
+    mpfr_set_si(img_rw,     img_width,    GMP_RNDN);
+    mpfr_set(   img_xmin,   img->xmin,    GMP_RNDN);
+    mpfr_set(   width,      img->width,   GMP_RNDN);
 
-/*  y = img->ymax - ((img->xmax - img->xmin) 
+/*  y = img->ymax - ((img->xmax - img->xmin)
                 / (long double)img->real_width)
                 * (long double)img->lines_done; */
     mpfr_div(       t1,     width,      img_rw,     GMP_RNDN);
@@ -296,12 +297,12 @@ int fractal_gmp_calculate_line(image_info* img, int line)
     mpf_init2(img_xmin,img->precision);
     mpf_init2(t1,      img->precision);
 
-    mpf_set_si(frs_bail,   4);
+    mpf_set_si(frs_bail,   img->bailout);
     mpf_set_si(img_rw,     img_width);
     mpf_set(   img_xmin,   img->gxmin);
     mpf_set(   width,      img->gwidth);
 
-/*  y = img->ymax - ((img->xmax - img->xmin) 
+/*  y = img->ymax - ((img->xmax - img->xmin)
                 / (long double)img->real_width)
                 * (long double)img->lines_done; */
     mpf_div(       t1,     width,      img_rw);

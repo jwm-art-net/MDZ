@@ -45,6 +45,7 @@ struct coords
     mpfr_t  _size;
 
     double aspect;
+    long bailout;
 
     mp_prec_t  precision;
     mp_prec_t  recommend; /* scant minimum */
@@ -60,7 +61,7 @@ struct coords
 typedef struct coords coords;
 
 
-coords* coords_new( int img_width, int img_height,
+coords* coords_new( int img_width, int img_height, long bailout,
                     double init_cx, double init_cy, double init_width);
 
 void    coords_set(coords*, int img_width, int img_height);

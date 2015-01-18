@@ -44,6 +44,7 @@ static int gui_idle_draw_id;
 static GtkWidget* j_pre_window =            NULL;
 static GtkWidget* recalc_button_label =     NULL;
 static GtkWidget* depth_spin =              NULL;
+static GtkWidget* bailout_spin =            NULL;
 static GtkWidget* pbar =                    NULL;
 static GtkWidget* switch_menu_cmd =         NULL;
 static GtkWidget* zoom_new_win =            NULL;
@@ -66,7 +67,7 @@ static void quit(void);
 static void redraw_image(image_info* img);
 
 static void create_menus(GtkWidget* vbox);
-static GtkWidget* menu_add(GtkWidget* menu, char* name, 
+static GtkWidget* menu_add(GtkWidget* menu, char* name,
                         void (*func)(void));
 
 static GdkRectangle horiz_intersect(GdkRectangle* a1, GdkRectangle* a2);
@@ -108,6 +109,10 @@ void load_settings_cmd(void)
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(depth_spin),
                                                         img->depth);
         gtk_spin_button_update(GTK_SPIN_BUTTON(depth_spin));
+
+        gtk_spin_button_set_value(GTK_SPIN_BUTTON(bailout_spin),
+                                                        img->bailout);
+        gtk_spin_button_update(GTK_SPIN_BUTTON(bailout_spin));
 
         if (img->user_width < MIN_WINDOW_WIDTH)
             gtk_widget_set_size_request(drawing_area,
@@ -163,7 +168,7 @@ GdkRectangle horiz_intersect(GdkRectangle* a1, GdkRectangle* a2)
 {
     GdkRectangle tmp;
     int ax1, ax2, bx1, bx2, cx1, cx2;
-    
+
     tmp.width = 0;
     tmp.y = a1->y;
     tmp.height = a1->height;
@@ -183,7 +188,7 @@ GdkRectangle horiz_intersect(GdkRectangle* a1, GdkRectangle* a2)
 
     tmp.x = cx1;
     tmp.width = cx2-cx1+1;
-        
+
     return tmp;
 }
 
@@ -270,7 +275,7 @@ void palette_load_cmd(void)
                     palette_apply(img, 0, 0,    img->user_width,
                                                 img->user_height);
                 else
-                    do_anti_aliasing(img, 0, 0, img->user_width, 
+                    do_anti_aliasing(img, 0, 0, img->user_width,
                                                 img->user_height);
                 redraw_image(img);
 
@@ -335,7 +340,7 @@ void do_palette_function(function_palette* fun_pal)
 void gui_resize_preview(void)
 {
     int xw,yw;
-    
+
     if (JPRE_SIZE/img->aspect < JPRE_SIZE) {
         xw = JPRE_SIZE;
         yw = JPRE_SIZE/img->aspect;
@@ -348,7 +353,7 @@ void gui_resize_preview(void)
             xw = 1;
         yw = JPRE_SIZE;
     }
-    
+
     image_info_set(j_pre, xw, yw, JPRE_AAFACTOR);
     gtk_widget_set_size_request(j_pre->drawing_area, xw, yw);
 }
@@ -404,6 +409,7 @@ static void do_reset_zoom(void)
     image_info_reset_view(img);
 
     gtk_spin_button_set_value((GtkSpinButton*)depth_spin, img->depth);
+    gtk_spin_button_set_value((GtkSpinButton*)bailout_spin, img->bailout);
 
     if (img_info_dlg)
         image_info_dlg_set(img, img_info_dlg);
@@ -626,6 +632,9 @@ void gui_start_rendering(image_info* img)
         gtk_spin_button_update( GTK_SPIN_BUTTON(depth_spin));
         img->depth = gtk_spin_button_get_value_as_int(
                                 GTK_SPIN_BUTTON(depth_spin));
+        gtk_spin_button_update( GTK_SPIN_BUTTON(bailout_spin));
+        img->bailout = gtk_spin_button_get_value_as_int(
+                                GTK_SPIN_BUTTON(bailout_spin));
         if (opts.logfd)
         {
             image_info_save_settings(img, opts.logfd);
@@ -998,6 +1007,20 @@ int gui_init(int* argc, char*** argv, image_info* img_)
     gtk_box_pack_start(GTK_BOX(hbox), depth_spin, FALSE, FALSE, 0);
     gtk_widget_show(depth_spin);
 
+    /* bailout label */
+    button = gtk_label_new("Bailout");
+    gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+    gtk_widget_show(button);
+
+    /* bailout spin-button */
+    adj = gtk_adjustment_new((gfloat)img->bailout,
+                                MIN_BAILOUT,
+                                MAX_BAILOUT, 1, 16, 0.0);
+    bailout_spin = gtk_spin_button_new(GTK_ADJUSTMENT(adj), 0.0, 0.0);
+    gtk_widget_set_tooltip_text(bailout_spin, "bailout value");
+    gtk_box_pack_start(GTK_BOX(hbox), bailout_spin, FALSE, FALSE, 0);
+    gtk_widget_show(bailout_spin);
+
     /* recalc button */
     button = gtk_button_new();
     recalc_button_label = gtk_label_new(TEXT_STOP);
@@ -1014,7 +1037,7 @@ int gui_init(int* argc, char*** argv, image_info* img_)
     pbar = gtk_progress_bar_new();
     gtk_progress_bar_set_orientation(GTK_PROGRESS_BAR(pbar),
                                      GTK_PROGRESS_LEFT_TO_RIGHT);
-    gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR(pbar), 
+    gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR(pbar),
                                (gfloat)1.0 ); /* img->real_height); */
     gtk_widget_set_size_request(pbar, 75, 0);
     gtk_box_pack_end(GTK_BOX(hbox), pbar, FALSE, FALSE, 0);
@@ -1032,7 +1055,7 @@ int gui_init(int* argc, char*** argv, image_info* img_)
                            | GDK_ENTER_NOTIFY_MASK
                            | GDK_LEAVE_NOTIFY_MASK
                            | GDK_EXPOSURE_MASK);
-    gtk_widget_set_size_request(tmp, 
+    gtk_widget_set_size_request(tmp,
                         (img->user_width >= MIN_WINDOW_WIDTH)
                         ? img->user_width : MIN_WINDOW_WIDTH,
                         img->user_height);
