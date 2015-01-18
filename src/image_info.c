@@ -464,7 +464,9 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
 
         if (mf->version_min >= 2) /* version 0.1.2 and above */
             if (!mdzfile_get_long(mf, "bailout", &bailout, MIN_BAILOUT, MAX_BAILOUT))
-                return mdzfile_err(mf, "Error in bailout setting");
+                return mdzfile_err(mf, "Error in bailout setting");'
+        else
+            bailout = DEFAULT_BAILOUT;
     }
 
     if (!mdzfile_get_long(mf, "depth", &depth, MIN_DEPTH, MAX_DEPTH))
