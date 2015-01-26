@@ -9,7 +9,7 @@
 #include "types.h"
 
 
-depth_t frac_burning_ship(      depth_t depth,
+depth_t frac_burning_ship(      depth_t depth,       long double bail,
                                 long double wim,     long double wre,
                                 long double c_im,    long double c_re,
                                 long double wim2,    long double wre2  );
