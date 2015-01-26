@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-depth_t frac_mandel(            depth_t depth,
+depth_t frac_mandel(            depth_t depth,       long double bail,
                                 long double wim,     long double wre,
                                 long double c_im,    long double c_re,
                                 long double wim2,    long double wre2  )
@@ -14,7 +14,7 @@ depth_t frac_mandel(            depth_t depth,
         wre = wre2 - wim2 + c_re;
         wim2 = wim * wim;
         wre2 = wre * wre;
-        if (wim2 + wre2 > 4.0F)
+        if (wim2 + wre2 > bail)
             return wz;
     }
     return 0;

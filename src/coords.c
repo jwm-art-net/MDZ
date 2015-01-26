@@ -47,7 +47,7 @@ int mpfr_mul_d(mpfr_t rop, mpfr_t op1, double _op2, mpfr_rnd_t rnd)
 #endif
 
 
-coords* coords_new( int img_width, int img_height,
+coords* coords_new( int img_width, int img_height, long bail,
                     double init_cx, double init_cy, double init_size)
 {
     coords* c = malloc(sizeof(*c));
@@ -56,8 +56,8 @@ coords* coords_new( int img_width, int img_height,
         return 0;
 
     c->precision =  0;
-
     c->precision = DEFAULT_PRECISION;
+    c->bail      = bail;
 
     mpfr_init2(c->xmin,     c->precision);
     mpfr_init2(c->xmax,     c->precision);
@@ -83,7 +83,7 @@ coords* coords_new( int img_width, int img_height,
 
 coords* coords_dup(const coords* c)
 {
-    coords* d = coords_new( c->img_width, c->img_height,
+    coords* d = coords_new( c->img_width, c->img_height, c->bail,
                             c->init_cx, c->init_cy, c->init_size);
 
     if (!d)
@@ -106,6 +106,7 @@ coords* coords_cpy(coords* dest, const coords* src)
     dest->init_cy =     src->init_cy;
     dest->init_size =   src->init_size;
     dest->recommend =   src->recommend;
+    dest->bail =        src->bail;
 
     mpfr_set(dest->xmin,    src->xmin,      GMP_RNDN);
     mpfr_set(dest->xmax,    src->xmax,      GMP_RNDN);
@@ -164,7 +165,7 @@ int coords_calculate_precision(coords* c)
     mpfr_init2(px_size,     c->precision);
     mpfr_init2(precision,   c->precision);
 
-    mpfr_set_d( bail,       4.0,        GMP_RNDN);
+    mpfr_set_d( bail,       c->bail,                    GMP_RNDN);
     mpfr_div_si(px_size,    c->width,   c->img_width,   GMP_RNDN);
     mpfr_div(   tmp,        bail,       px_size,        GMP_RNDN);
 
