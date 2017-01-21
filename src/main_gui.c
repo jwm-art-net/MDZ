@@ -404,6 +404,8 @@ static void do_reset_zoom(void)
     image_info_reset_view(img);
 
     gtk_spin_button_set_value((GtkSpinButton*)depth_spin, img->depth);
+    gtk_check_menu_item_set_active(
+        GTK_CHECK_MENU_ITEM(zoom_new_win), img->zoom_new_win);
 
     if (img_info_dlg)
         image_info_dlg_set(img, img_info_dlg);
