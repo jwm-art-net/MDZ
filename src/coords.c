@@ -123,7 +123,7 @@ coords* coords_cpy(coords* dest, const coords* src)
 }
 
 
-#ifdef DEBUG
+/*#ifdef DEBUG*/
 #if MPFR_VERSION_MAJOR == 2 && MPFR_VERSION_MINOR >= 4
 void coords_dump(const coords* c, const char* msg)
 {
@@ -136,7 +136,7 @@ void coords_dump(const coords* c, const char* msg)
     printf("c->precision: %ld\n", (long)c->precision);
 }
 #endif
-#endif
+/*#endif*/
 
 
 void coords_free(coords* c)
@@ -158,6 +158,8 @@ int coords_calculate_precision(coords* c)
     mpfr_t bail;
     mpfr_t px_size;
     mpfr_t precision;
+
+    DMSG("Calculating recommended precision...");
 
     mpfr_init2(tmp,         c->precision);
     mpfr_init2(bail,        c->precision);
@@ -230,7 +232,7 @@ void coords_set_precision(coords* c, mpfr_prec_t precision)
 
 void coords_rect_to_center(coords* c)
 {
-    DMSG("updating from rect to center\n");
+    DMSG("updating from rect to center");
 
     /* calc width, height */
     mpfr_sub(   c->width,   c->xmax,    c->xmin,        GMP_RNDN);
@@ -253,7 +255,7 @@ void coords_set(coords* c, int img_width, int img_height)
 {
     c->img_width =  img_width;
     c->img_height = img_height;
-    c->aspect =     (double)img_width / img_height;
+    c->aspect = (double)img_width / img_height;
     c->size = (c->aspect > 1.0) ? &c->width : &c->height;
     mpfr_set(*c->size,  c->_size,  GMP_RNDN);
 }
@@ -264,7 +266,7 @@ void coords_center_to_rect(coords* c)
     mpfr_t tmp;
     mpfr_init2(tmp, c->precision);
 
-    DMSG("updating from center to rect\n");
+    DMSG("updating from center to rect");
 
     if (c->aspect > 1.0)
     {
@@ -343,7 +345,7 @@ void coords_zoom(coords* c, double multiplier)
     mpfr_set(   *c->size,   c->_size,               GMP_RNDN);
 
     if (c->aspect > 1.0)
-        mpfr_div_d(c->height,   c->width,   c->aspect,  GMP_RNDN);
+        mpfr_div_d(c->height,  c->width,    c->aspect,  GMP_RNDN);
     else
         mpfr_mul_d(c->width,   c->height,   c->aspect,  GMP_RNDN);
 

@@ -55,7 +55,7 @@ static image_info_dialog*   img_info_dlg =  NULL;
 
 static gint idle_draw_callback(image_info* img);
 
-static void gui_stop_rendering(image_info* img);
+//static void gui_stop_rendering(image_info* img);
 static void start_julia_browsing(void);
 static void stop_julia_browsing(void);
 
@@ -661,7 +661,7 @@ void gui_start_rendering(image_info* img)
 void gui_stop_rendering(image_info* img)
 {
     DMSG("gui_stop_rendering");
-    rth_ui_stop_render((rthdata*)img->rth_ptr);
+    rth_ui_stop_render_and_wait((rthdata*)img->rth_ptr);
 
     if (gui_idle_draw_id != -1)
     {

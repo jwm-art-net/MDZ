@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <mpfr.h>
 
+#include "debug.h"
 #include "my_mpfr_to_str.h"
 #include "main.h"
 #include "main_gui.h"
@@ -31,6 +32,8 @@ void image_info_dlg_new(image_info_dialog** ptr, image_info* img)
     GtkWidget* vbox;
     GtkObject* adj;
     image_info_dialog* dl;
+
+    DMSG("image_info_dlg_new");
 
     int y = 0;
 
@@ -239,6 +242,7 @@ void image_info_dlg_new(image_info_dialog** ptr, image_info* img)
 
 void width_update(GtkWidget* w, image_info_dialog* dl)
 {
+    DMSG("width_update");
     (void)w;
     int height;
     int width = atoi(gtk_entry_get_text(GTK_ENTRY(dl->width)));
@@ -263,6 +267,7 @@ void width_update(GtkWidget* w, image_info_dialog* dl)
 
 void height_update(GtkWidget* w, image_info_dialog* dl)
 {
+    DMSG("height_update");
     (void)w;
     int width;
     int height = atoi(gtk_entry_get_text(GTK_ENTRY(dl->height)));
@@ -321,6 +326,7 @@ void update_text(GtkLabel* label, int w, int h, int aa)
 void image_dlg_update_recommended_precision(image_info_dialog* dl,
                                             image_info* img)
 {
+    DMSG("image_dlg_update_recommended_precision");
     char str[MAX_DP];
     sprintf(str, "Precision (bits):\nScant minimum:%ld",
                         (long)img->pcoords->recommend);
@@ -359,6 +365,7 @@ static void image_dlg_destroy(GtkWidget* widget,
 
 void image_info_ok_cmd(GtkWidget* w, image_info_dialog* dl)
 {
+    DMSG("image_info_ok_cmd");
     image_info_apply_cmd(w, dl);
     gtk_widget_destroy(dl->dialog);
 }
@@ -367,6 +374,7 @@ void image_info_apply_cmd(GtkWidget* widget, image_info_dialog* dl)
 {
     (void)widget;
     int tc;
+    DMSG("image_info_apply_cmd");
 
     mp_prec_t precision =
         gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(dl->precision));
@@ -459,7 +467,7 @@ void do_image_info_save_dialog(image_info* img)
 static void file_data_toggled(GtkToggleButton* toggle, gpointer data)
 {
     (void)data;
-
+    DMSG("file_data_toggled");
     bool data_to_load = gtk_toggle_button_get_active(
                                 GTK_TOGGLE_BUTTON(check_button_fractal));
 
@@ -481,7 +489,7 @@ static void file_data_toggled(GtkToggleButton* toggle, gpointer data)
 int do_image_info_load_dialog(image_info* img)
 {
     int good = 0;
-
+    DMSG("do_image_info_load_dialog");
     GtkWidget*  frame = 0;
     GtkWidget*  hbox = 0;
     GtkWidget*  tmp = 0;
@@ -538,6 +546,8 @@ int do_image_info_load_dialog(image_info* img)
         filename = gtk_file_chooser_get_filename(
                                         GTK_FILE_CHOOSER(dl));
 
+        gui_stop_rendering(img);
+
         good = image_info_load_all(img, flags, filename);
         g_free(filename);
     }
@@ -549,6 +559,7 @@ int do_image_info_load_dialog(image_info* img)
 
 void image_info_dlg_set(image_info* img, image_info_dialog* dl)
 {
+    DMSG("image_info_dlg_set");
     g_signal_handler_block(G_OBJECT(dl->width), width_sig);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(dl->width),
                                               img->user_width);

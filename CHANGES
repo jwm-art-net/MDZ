@@ -1,4 +1,15 @@
 -------------------------------------------
+mdz-0.1.2
+
+FIXES:
+
+* Avoid seg-fault by waiting for all render threads
+  to finish before loading an MDZ file.
+
+* Update "Zoom in new window" checkbox after
+  using "Reset zoom".
+
+-------------------------------------------
 mdz-0.1.1
 
 CHANGES
@@ -354,6 +365,3 @@ which distracts for exploration of the standard
 Mandelbrot-Set
 
 added usage of MPFR library.
-
-
-

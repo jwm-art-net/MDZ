@@ -65,6 +65,8 @@ void gui_resize(int width, int height);
 
 void gui_start_rendering(image_info* img);
 
+void gui_stop_rendering(image_info* img);
+
 void gui_resize_preview(void);
 
 gboolean gui_is_julia_browsing(void);

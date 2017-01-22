@@ -96,6 +96,7 @@ void image_info_destroy(image_info* img)
 
 void image_info_set(image_info* img, int w, int h, int aa_factor)
 {
+    DMSG("image_info_set");
     gboolean same_size;
 
     if ((img->user_width == w)
@@ -138,6 +139,8 @@ void image_info_set(image_info* img, int w, int h, int aa_factor)
 
 void image_info_switch_fractal(image_info* img, int real_px, int imag_py)
 {
+    DMSG("image_info_switch_fractal");
+
     if (img->family == FAMILY_JULIA)
     {
         img->family = FAMILY_MANDEL;
@@ -172,6 +175,8 @@ void image_info_switch_fractal(image_info* img, int real_px, int imag_py)
 
 void image_info_threads_change(image_info* img, int thread_count)
 {
+    DMSG("image_info_threads_change");
+
     img->thread_count = thread_count;
 
     if (!img->rth_ptr)
@@ -186,7 +191,7 @@ void image_info_threads_change(image_info* img, int thread_count)
 
     DMSG("calling thread init...");
     if (!rth_init((rthdata*)img->rth_ptr, img->thread_count,
-                                            img->draw_lines, img))
+                                          img->draw_lines,   img))
     {
         fprintf(stderr, "failed to initialize multi-threading data\n");
     }
@@ -214,6 +219,8 @@ void image_info_clear_image(image_info* img, bool raw, bool rgb)
 void image_info_set_multi_prec(image_info* img, bool use_multi_prec,
                                                 bool use_rounding)
 {
+    DMSG("image_info_set_multi_prec");
+
     rthdata* rth = (rthdata*)img->rth_ptr;
 
     if (!img->rth_ptr)
@@ -237,6 +244,8 @@ void image_info_set_multi_prec(image_info* img, bool use_multi_prec,
 
 void image_info_set_precision(image_info * img, mpfr_prec_t precision)
 {
+    DMSG("image_info_set_precision");
+
     if (img->precision == precision)
         return;
 
@@ -437,6 +446,8 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
     int ret = 0;
     long paloff;
 
+    DMSG("image_info_load_settings");
+
     mpfr_t cx, cy, size, xmin, xmax, ymax, j_re, j_im;
 
     if(mf->version_maj == 0 && mf->version_min == 0)
@@ -584,7 +595,6 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
     image_info_set_multi_prec(img, use_multi_prec, use_rounding);
     img->colour_scale = colsc;
     img->palette_ip =   colip;
-
     coords_set_precision(img->pcoords, precision);
     image_info_set_precision(img, precision);
 
@@ -597,6 +607,8 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
     {
         coords_set_rect(img->pcoords, xmin, xmax, ymax);
     }
+
+    coords_calculate_precision(img->pcoords);
 
     if (family == FAMILY_JULIA)
     {
@@ -622,6 +634,7 @@ fail:
 
 int image_info_load_palette(mdzfile* mf)
 {
+    DMSG("image_info_load_palette");
     char* palfile = 0;
 
     if (!mdzfile_read(mf))
@@ -639,6 +652,7 @@ int image_info_load_palette(mdzfile* mf)
 
 int image_info_load_all(image_info * img, int sect_flags, const char * fn)
 {
+    DMSG("image_info_load_all");
     if (!fn)
         return 0;
 

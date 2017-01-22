@@ -69,6 +69,8 @@ static pthread_attr_t       rth_attr;
 
 rthdata* rth_create()
 {
+    DMSG("rth_create");
+
     rthdata* rth = malloc(sizeof(rthdata));
 
     if (!rth)
@@ -85,7 +87,7 @@ rthdata* rth_create()
 
     memset(rth->data, 0, sizeof(rthpridata));
 
-    DMSG("Created rthdata\n");
+    DMSG("Created rthdata");
 
     return rth;
 }
@@ -95,6 +97,8 @@ int rth_init(rthdata* rth, int thread_count,
                            int line_draw_count,
                            image_info * img)
 {
+    DMSG("rth_init");
+
     if (img)
         rth->img = img;
 
@@ -106,8 +110,10 @@ int rth_init(rthdata* rth, int thread_count,
         free(data->threads);
         data->threads = malloc(sizeof(pthread_t) * thread_count);
 
-        if (!data->threads)
+        if (!data->threads) {
+            DMSG("failed to allocate thread data");
             return 0;
+        }
     }
 
     data->start =  0;
@@ -155,6 +161,8 @@ int rth_init(rthdata* rth, int thread_count,
 
 int rth_ui_init(rthdata* rth)
 {
+    DMSG("rth_ui_init (start watch thread)");
+
     int rc_err = pthread_create(&rth->data->start_watch_thread,
                                 &rth_attr,
                                 rth_init_start_watch,
@@ -241,7 +249,6 @@ void * rth_init_start_watch(void * ptr)
 void * rth_create_render(void * ptr)
 {
     DMSG("creating main render thread");
-    DMSG("---------------------------");
 
     rthdata* rth = (rthdata*)ptr;
     rthpridata* data = rth->data;
@@ -393,7 +400,7 @@ void rth_ui_stop_render(rthdata* rth)
 
 void rth_ui_stop_render_and_wait(rthdata* rth)
 {
-    DMSG("rth_stop_render");
+    DMSG("rth_stop_render_and_wait");
     pthread_mutex_lock(&rth->data->status_mutex);
     rth->data->status = RT_STOP | (rth->data->status & RT_RENDERING);
     pthread_mutex_unlock(&rth->data->status_mutex);
@@ -505,6 +512,11 @@ int rth_render_should_stop(rthdata* rth)
     pthread_mutex_lock(&rth->data->status_mutex);
     ret = !!(rth->data->status & RT_STOP);
     pthread_mutex_unlock(&rth->data->status_mutex);
+    #ifdef DEBUG
+    if (ret) {
+        DMSG("rth_render_should_stop == TRUE")
+    }
+    #endif
     return ret;
 }
 
