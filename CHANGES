@@ -9,6 +9,9 @@ FIXES:
 * Update "Zoom in new window" checkbox after
   using "Reset zoom".
 
+* Update colour scale value in palette dialog after
+  'Reset zoom'.
+
 -------------------------------------------
 mdz-0.1.1
 

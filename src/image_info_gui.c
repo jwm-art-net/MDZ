@@ -42,7 +42,7 @@ void image_info_dlg_new(image_info_dialog** ptr, image_info* img)
 
     dl->ratio = (double)img->user_width/img->user_height;
     dl->dialog = gtk_dialog_new();
-    
+
     g_signal_connect(GTK_OBJECT(dl->dialog), "destroy",
                        G_CALLBACK(image_dlg_destroy),
                        dl);
@@ -82,7 +82,7 @@ void image_info_dlg_new(image_info_dialog** ptr, image_info* img)
                        TRUE, TRUE, 0);
     gtk_container_set_border_width(GTK_CONTAINER(vbox), 10);
     gtk_widget_show(vbox);
-    
+
     tmp = gtk_label_new("Width:");
     gtk_misc_set_alignment(GTK_MISC(tmp), 0.0, 0.5);
     gtk_table_attach_defaults(GTK_TABLE(table), tmp, 0, 1, y, y+1);
@@ -460,7 +460,7 @@ void do_image_info_save_dialog(image_info* img)
         image_info_save_all(img, filename);
         g_free(filename);
     }
-    gtk_widget_destroy (dialog); 
+    gtk_widget_destroy (dialog);
 }
 
 
@@ -548,6 +548,8 @@ int do_image_info_load_dialog(image_info* img)
 
         gui_stop_rendering(img);
 
+        DMSG("rendering stopped, proceeding to load image info...");
+
         good = image_info_load_all(img, flags, filename);
         g_free(filename);
     }
@@ -570,7 +572,7 @@ void image_info_dlg_set(image_info* img, image_info_dialog* dl)
     g_signal_handler_unblock(G_OBJECT(dl->height), height_sig);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(dl->aa),  img->aa_factor);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dl->const_ra), TRUE);
-    update_text(GTK_LABEL(dl->text), 
+    update_text(GTK_LABEL(dl->text),
         gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(dl->width)),
         gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(dl->height)),
         gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(dl->aa)));

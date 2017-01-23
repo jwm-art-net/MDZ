@@ -8,12 +8,9 @@
 
 typedef enum RTH_RENDER_STATUS
 {
-    RT_STARTING =   0x0001,
     RT_STOP =       0x0002,
     RT_QUIT =       0x0004,
     RT_RENDERING =  0x0008,
-    RT_COMPLETE =   0x0010,
-    RT_STOPPED =    0x0020
 } rth_status;
 
 
@@ -56,6 +53,16 @@ struct rthpridata
 
     Timer timing_info;
 };
+
+
+#ifdef DEBUG
+static void rth_status_dump(rthdata* rth)
+{
+    if (rth->data->status & RT_STOP) { DMSG("RT_STOP"); }
+    if (rth->data->status & RT_QUIT) { DMSG("RT_QUIT"); }
+    if (rth->data->status & RT_RENDERING) { DMSG("RT_RENDERING"); }
+}
+#endif
 
 
 static void *   rth_init_start_watch(void * ptr);
@@ -219,6 +226,10 @@ void * rth_init_start_watch(void * ptr)
             rendering = 0;
         }
 
+        #ifdef DEBUG
+        rth_status_dump(rth);
+        #endif
+
         pthread_mutex_unlock(&data->status_mutex);
 
         if (rendering)
@@ -266,6 +277,9 @@ void * rth_create_render(void * ptr)
 
     pthread_mutex_lock(&data->status_mutex);
     data->status = RT_RENDERING;
+    #ifdef DEBUG
+    rth_status_dump(rth);
+    #endif
     pthread_mutex_unlock(&data->status_mutex);
 
     pthread_mutex_lock(&data->next_line_mutex);
@@ -316,6 +330,9 @@ void * rth_create_render(void * ptr)
 
     pthread_mutex_lock(&data->status_mutex);
     data->status = RT_STOP;
+    #ifdef DEBUG
+    rth_status_dump(rth);
+    #endif
     pthread_mutex_unlock(&data->status_mutex);
 
     pthread_exit(0);
@@ -394,6 +411,9 @@ void rth_ui_stop_render(rthdata* rth)
     DMSG("rth_stop_render");
     pthread_mutex_lock(&rth->data->status_mutex);
     rth->data->status = RT_STOP | (rth->data->status & RT_RENDERING);
+    #ifdef DEBUG
+    rth_status_dump(rth);
+    #endif
     pthread_mutex_unlock(&rth->data->status_mutex);
 }
 
@@ -402,7 +422,20 @@ void rth_ui_stop_render_and_wait(rthdata* rth)
 {
     DMSG("rth_stop_render_and_wait");
     pthread_mutex_lock(&rth->data->status_mutex);
+
+    if (rth->data->status & RT_STOP) {
+        #ifdef DEBUG
+        rth_status_dump(rth);
+        #endif
+
+        pthread_mutex_unlock(&rth->data->status_mutex);
+        return;
+    }
+
     rth->data->status = RT_STOP | (rth->data->status & RT_RENDERING);
+    #ifdef DEBUG
+    rth_status_dump(rth);
+    #endif
     pthread_mutex_unlock(&rth->data->status_mutex);
     pthread_join(rth->data->render_thread, NULL);
 }
@@ -415,6 +448,9 @@ void rth_ui_quit(rthdata* rth)
     /* set status to quit and signal start watch to wake up.. */
     pthread_mutex_lock(&data->status_mutex);
     data->status |= RT_QUIT; /* preserve rendering status!! */
+    #ifdef DEBUG
+    rth_status_dump(rth);
+    #endif
     pthread_cond_signal(&data->start_cond);
     pthread_mutex_unlock(&data->status_mutex);
 
@@ -486,8 +522,6 @@ int rth_process_lines_rendered(rthdata* rth)
         char* ld = &rth->lines_drawn[miny];
         int unrendered = 0;
         int i;
-
-        //printf("process_lines_rendered:\n");
 
         for (i = miny; i < maxy; ++i, ++lr, ++ld)
         {

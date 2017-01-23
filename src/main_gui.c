@@ -66,7 +66,7 @@ static void quit(void);
 static void redraw_image(image_info* img);
 
 static void create_menus(GtkWidget* vbox);
-static GtkWidget* menu_add(GtkWidget* menu, char* name, 
+static GtkWidget* menu_add(GtkWidget* menu, char* name,
                         void (*func)(void));
 
 static GdkRectangle horiz_intersect(GdkRectangle* a1, GdkRectangle* a2);
@@ -163,7 +163,7 @@ GdkRectangle horiz_intersect(GdkRectangle* a1, GdkRectangle* a2)
 {
     GdkRectangle tmp;
     int ax1, ax2, bx1, bx2, cx1, cx2;
-    
+
     tmp.width = 0;
     tmp.y = a1->y;
     tmp.height = a1->height;
@@ -183,7 +183,7 @@ GdkRectangle horiz_intersect(GdkRectangle* a1, GdkRectangle* a2)
 
     tmp.x = cx1;
     tmp.width = cx2-cx1+1;
-        
+
     return tmp;
 }
 
@@ -270,7 +270,7 @@ void palette_load_cmd(void)
                     palette_apply(img, 0, 0,    img->user_width,
                                                 img->user_height);
                 else
-                    do_anti_aliasing(img, 0, 0, img->user_width, 
+                    do_anti_aliasing(img, 0, 0, img->user_width,
                                                 img->user_height);
                 redraw_image(img);
 
@@ -335,7 +335,7 @@ void do_palette_function(function_palette* fun_pal)
 void gui_resize_preview(void)
 {
     int xw,yw;
-    
+
     if (JPRE_SIZE/img->aspect < JPRE_SIZE) {
         xw = JPRE_SIZE;
         yw = JPRE_SIZE/img->aspect;
@@ -348,7 +348,7 @@ void gui_resize_preview(void)
             xw = 1;
         yw = JPRE_SIZE;
     }
-    
+
     image_info_set(j_pre, xw, yw, JPRE_AAFACTOR);
     gtk_widget_set_size_request(j_pre->drawing_area, xw, yw);
 }
@@ -410,6 +410,9 @@ static void do_reset_zoom(void)
     if (img_info_dlg)
         image_info_dlg_set(img, img_info_dlg);
 
+    if (palgui)
+        palette_gui_update(palgui, img);
+
     gui_start_rendering(img);
 
     if (stat.action == STAT_JULIA_BROWSING)
@@ -428,24 +431,6 @@ void do_pal_edit_dialog(void)
     palette_gui_new(&palgui, img);
 }
 
-/*  commenting this out until I figure out what it's supposed to do
-
---  ie, what are these child processes? not the duplicate or
-    zoom-in-new-window windows - because they're not killed when
-    this is called - and anyway, i don't want them killed just because
-    i close the window which spawned them, so wtf!?!?
-
---  gfract in c heritage
-
-gint child_reaper(gpointer nothing)
-{
-    printf("in child_reaper\n");
-    // wait until all dead child processes are cleaned up
-    while (waitpid(-1, NULL, WNOHANG) > 0)
-        ;
-    return TRUE;
-}
-*/
 
 GtkWidget* menu_add(GtkWidget* menu, char* name, void (*func)(void))
 {
@@ -1016,7 +1001,7 @@ int gui_init(int* argc, char*** argv, image_info* img_)
     pbar = gtk_progress_bar_new();
     gtk_progress_bar_set_orientation(GTK_PROGRESS_BAR(pbar),
                                      GTK_PROGRESS_LEFT_TO_RIGHT);
-    gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR(pbar), 
+    gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR(pbar),
                                (gfloat)1.0 ); /* img->real_height); */
     gtk_widget_set_size_request(pbar, 75, 0);
     gtk_box_pack_end(GTK_BOX(hbox), pbar, FALSE, FALSE, 0);
@@ -1034,7 +1019,7 @@ int gui_init(int* argc, char*** argv, image_info* img_)
                            | GDK_ENTER_NOTIFY_MASK
                            | GDK_LEAVE_NOTIFY_MASK
                            | GDK_EXPOSURE_MASK);
-    gtk_widget_set_size_request(tmp, 
+    gtk_widget_set_size_request(tmp,
                         (img->user_width >= MIN_WINDOW_WIDTH)
                         ? img->user_width : MIN_WINDOW_WIDTH,
                         img->user_height);
