@@ -5,7 +5,7 @@ char* my_mpfr_to_str(mpfr_t n)
 {
     static char d0[MAX_DP + 1];
 
-    #if MPFR_VERSION_MAJOR == 2 && MPFR_VERSION_MINOR < 4
+    #if MPFR_VERSION_MAJOR < 2 || (MPFR_VERSION_MAJOR == 2 && MPFR_VERSION_MINOR < 4)
 
     char* s;
     char* s0;

@@ -39,7 +39,7 @@ void init_misc(void)
         if (opts.aspect)
             opts.width = opts.height * opts.aspect;
         else
-            opts.width = img->user_height / img->aspect;
+            opts.width = opts.height * img->aspect;
     }
     else if (!opts.height)
     {
@@ -61,8 +61,6 @@ void init_misc(void)
     img->thread_count = opts.threads;
 
     image_info_set(img, opts.width, opts.height, opts.antialias);
-
-    img->rnd_pal = &rnd_palette;
 
     fun_palette.offset = 0;
     fun_palette.stripe = 1;
@@ -98,7 +96,7 @@ int main(int argc, char** argv)
 
     img = image_info_create(FAMILY_MANDEL, MANDELBROT);
 
-    init_misc();
+    img->rnd_pal = &rnd_palette;
 
     if (opts.dumpfile)
     {
@@ -131,6 +129,8 @@ int main(int argc, char** argv)
             goto quit1;
         }
     }
+
+    init_misc();
 
     if (opts.palettefile)
     {

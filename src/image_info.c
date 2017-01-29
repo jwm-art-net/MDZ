@@ -667,7 +667,6 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
     image_info_set_precision(img, precision);
 
     if (rndpal) {
-        DMSG("setting random palette generation data.");
         img->rnd_pal->r_strength = rnd_rs;
         img->rnd_pal->g_strength = rnd_gs;
         img->rnd_pal->b_strength = rnd_bs;
@@ -687,9 +686,8 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
     else
     {
         coords_set_rect(img->pcoords, xmin, xmax, ymax);
+        coords_calculate_precision(img->pcoords);
     }
-
-    coords_calculate_precision(img->pcoords);
 
     if (family == FAMILY_JULIA)
     {

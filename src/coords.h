@@ -10,7 +10,7 @@
 #define DEFAULT_PRECISION 80
 
 
-#if MPFR_VERSION_MAJOR == 2 && MPFR_VERSION_MINOR < 4
+#if MPFR_VERSION_MAJOR < 2 || (MPFR_VERSION_MAJOR == 2 && MPFR_VERSION_MINOR < 4)
 int mpfr_div_d(mpfr_t rop, mpfr_t op1, double _op2, mpfr_rnd_t rnd);
 int mpfr_mul_d(mpfr_t rop, mpfr_t op1, double _op2, mpfr_rnd_t rnd);
 #endif
@@ -102,8 +102,6 @@ void    coords_get_rect_gmp(coords*,    mpf_t xmin, mpf_t xmax,
 void    coords_set_rect(coords*,    mpfr_t xmin, mpfr_t xmax,
                                                  mpfr_t ymax);
 
-#ifdef DEBUG
 void    coords_dump(const coords*, const char* msg);
-#endif
 
 #endif

@@ -21,8 +21,7 @@ void mpfr_to_gmp(mpfr_t from, mpf_t to)
 static void coords_mpfr_clear(coords* c);
 
 
-
-#if MPFR_VERSION_MAJOR == 2 && MPFR_VERSION_MINOR < 4
+#if MPFR_VERSION_MAJOR < 2 || (MPFR_VERSION_MAJOR == 2 && MPFR_VERSION_MINOR < 4)
 int mpfr_div_d(mpfr_t rop, mpfr_t op1, double _op2, mpfr_rnd_t rnd)
 {
     int r;
@@ -123,9 +122,9 @@ coords* coords_cpy(coords* dest, const coords* src)
 }
 
 
-#if MPFR_VERSION_MAJOR == 2 && MPFR_VERSION_MINOR >= 4
 void coords_dump(const coords* c, const char* msg)
 {
+#if MPFR_VERSION_MAJOR > 2 || (MPFR_VERSION_MAJOR == 2 && MPFR_VERSION_MINOR >= 4)
     mpfr_printf("%s\nc->cx:%.Rf\tc->cy:%.Rf\tc->size:%.Rf\n",
                 msg, c->cx,  c->cy, c->width);
 
@@ -133,8 +132,8 @@ void coords_dump(const coords* c, const char* msg)
                 c->xmin,  c->xmax, c->ymax);
 
     printf("c->precision: %ld\n", (long)c->precision);
-}
 #endif
+}
 
 
 void coords_free(coords* c)
@@ -159,6 +158,10 @@ int coords_calculate_precision(coords* c)
 
     DMSG("Calculating recommended precision...\n");
 
+    #ifndef NDEBUG
+    coords_dump(c,"meh:");
+    #endif
+
     mpfr_init2(tmp,         c->precision);
     mpfr_init2(bail,        c->precision);
     mpfr_init2(px_size,     c->precision);
@@ -182,7 +185,7 @@ int coords_calculate_precision(coords* c)
     mpfr_clear(precision);
 
     mpfr_free_cache(); /* <-- keep valgrind happy over mpfr_log2 */
-
+    DMSG("Recommended precision: %ld\n", c->recommend);
     return c->recommend;
 }
 

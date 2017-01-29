@@ -103,13 +103,8 @@ bool setting_get_long(  const char* buf,   const char* name,
     {
         nlen = strlen(name);
 
-        /*if (strlen(buf) < nlen + 1 || strncmp(name, buf, nlen))*/
-        if (strncmp(name, buf, nlen)) {
-            char* q = strdup(buf);
-            *(q+nlen)='\0';
-            DMSG("comparison fail: '%s' != '%s'\n", name, q);
+        if (strlen(buf) < nlen + 1 || strncmp(name, buf, nlen))
             return false;
-        }
     }
 
     setlocale(LC_NUMERIC, "C");
@@ -117,17 +112,14 @@ bool setting_get_long(  const char* buf,   const char* name,
     setlocale(LC_NUMERIC, sysloc);
 
     if (r != 1)
-    {
-     DMSG("read %ld arguments for %s\n", r, name);
      return false;
-    }
-DMSG("read 1 arg\n");
+
     if (!min && !max)
         return true;
 
     if (*val < min || *val > max)
         return false;
-DMSG("val %ld within bounds %ld ~ %ld\n", *val, min, max);
+
     return true;
 }
 
