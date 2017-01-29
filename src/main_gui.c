@@ -600,7 +600,7 @@ gint idle_draw_callback(image_info* img)
 
 void gui_start_rendering(image_info* img)
 {
-    DMSG("gui_start_rendering");
+    DMSG("gui_start_rendering\n");
 
     coords_get_rect(img->pcoords,   img->xmin, img->xmax,
                                     img->ymax, img->width);
@@ -645,7 +645,7 @@ void gui_start_rendering(image_info* img)
 
 void gui_stop_rendering(image_info* img)
 {
-    DMSG("gui_stop_rendering");
+    DMSG("gui_stop_rendering\n");
     rth_ui_stop_render_and_wait((rthdata*)img->rth_ptr);
 
     if (gui_idle_draw_id != -1)

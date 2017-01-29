@@ -69,8 +69,13 @@ bool mdzfile_test_for_name(mdzfile* mf, const char* name)
 {
     size_t nlen = 0;
 
-    if (!mdzfile_read(mf)){printf("bloo!\n");
-        return false;}
+    DMSG("test %s", name);
+
+    if (!mdzfile_read(mf))
+    {
+        DMSG("bloooohhhh!\n");
+        return false;
+    }
 
     nlen = strlen(name);
     mf->test = strdup(mf->line);

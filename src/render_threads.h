@@ -47,7 +47,7 @@ int     rth_init(rthdata* rth,
 /****** ----------------------------------------------------------------
  ****** ui control: these are used by the ui for controlling
  ****** the rendering threads. rth_ui_start creates a watch thread
- ****** wich simply waits for the gui to tell it start up the rendering
+ ****** which simply waits for the gui to tell it start up the rendering
  ****** threads. this is done by ui_start_render, and can be stopped
  ****** by the ui_stop and ui_quit functions.
  ******/

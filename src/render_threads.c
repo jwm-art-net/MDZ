@@ -55,12 +55,12 @@ struct rthpridata
 };
 
 
-#ifdef DEBUG
+#ifndef NDEBUG
 static void rth_status_dump(rthdata* rth)
 {
-    if (rth->data->status & RT_STOP) { DMSG("RT_STOP"); }
-    if (rth->data->status & RT_QUIT) { DMSG("RT_QUIT"); }
-    if (rth->data->status & RT_RENDERING) { DMSG("RT_RENDERING"); }
+    if (rth->data->status & RT_STOP) { DMSG("RT_STOP\n"); }
+    if (rth->data->status & RT_QUIT) { DMSG("RT_QUIT\n"); }
+    if (rth->data->status & RT_RENDERING) { DMSG("RT_RENDERING\n"); }
 }
 #endif
 
@@ -76,7 +76,7 @@ static pthread_attr_t       rth_attr;
 
 rthdata* rth_create()
 {
-    DMSG("rth_create");
+    DMSG("rth_create\n");
 
     rthdata* rth = malloc(sizeof(rthdata));
 
@@ -94,7 +94,7 @@ rthdata* rth_create()
 
     memset(rth->data, 0, sizeof(rthpridata));
 
-    DMSG("Created rthdata");
+    DMSG("Created rthdata\n");
 
     return rth;
 }
@@ -104,7 +104,7 @@ int rth_init(rthdata* rth, int thread_count,
                            int line_draw_count,
                            image_info * img)
 {
-    DMSG("rth_init");
+    DMSG("rth_init\n");
 
     if (img)
         rth->img = img;
@@ -118,7 +118,7 @@ int rth_init(rthdata* rth, int thread_count,
         data->threads = malloc(sizeof(pthread_t) * thread_count);
 
         if (!data->threads) {
-            DMSG("failed to allocate thread data");
+            DMSG("failed to allocate thread data\n");
             return 0;
         }
     }
@@ -161,14 +161,14 @@ int rth_init(rthdata* rth, int thread_count,
         pthread_cond_init(&data->check_stop_px_cond,    NULL);
     }
 
-    DMSG("initialized rthdata");
+    DMSG("initialized rthdata\n");
 
     return 1;
 }
 
 int rth_ui_init(rthdata* rth)
 {
-    DMSG("rth_ui_init (start watch thread)");
+    DMSG("rth_ui_init (start watch thread)\n");
 
     int rc_err = pthread_create(&rth->data->start_watch_thread,
                                 &rth_attr,
@@ -192,11 +192,11 @@ void * rth_init_start_watch(void * ptr)
 
     int quit = 0;
 
-    DMSG("starting start_watch thread");
+    DMSG("starting start_watch thread\n");
 
     for(;;)
     {
-        DMSG("waiting on start mutex");
+        DMSG("waiting on start mutex\n");
 
         pthread_mutex_lock(&data->start_mutex);
         if (!data->start)
@@ -208,7 +208,7 @@ void * rth_init_start_watch(void * ptr)
         data->started = 0;
         pthread_mutex_unlock(&data->started_mutex);
 
-        DMSG("start mutex unblocked");
+        DMSG("start mutex unblocked\n");
 
         pthread_mutex_lock(&data->status_mutex);
 
@@ -216,17 +216,17 @@ void * rth_init_start_watch(void * ptr)
 
         if (data->status & RT_RENDERING)
         {
-            DMSG("rendering, setting stop");
+            DMSG("rendering, setting stop\n");
             data->status = RT_STOP;
             rendering = 1;
         }
         else
         {
-            DMSG("not currently rendering");
+            DMSG("not currently rendering\n");
             rendering = 0;
         }
 
-        #ifdef DEBUG
+        #ifndef NDEBUG
         rth_status_dump(rth);
         #endif
 
@@ -234,13 +234,13 @@ void * rth_init_start_watch(void * ptr)
 
         if (rendering)
         {
-            DMSG("waiting for render thread to finish");
+            DMSG("waiting for render thread to finish\n");
             pthread_join(data->render_thread, NULL);
         }
 
         if (quit)
         {
-            DMSG("quiting start_watch thread");
+            DMSG("quiting start_watch thread\n");
             pthread_exit(0);
         }
 
@@ -250,7 +250,7 @@ void * rth_init_start_watch(void * ptr)
                                 (void*)rth);
         if (rc_err)
         {
-            DMSG("*** failed to create render thread ***");
+            DMSG("*** failed to create render thread ***\n");
             pthread_exit(0);
         }
     }
@@ -259,14 +259,14 @@ void * rth_init_start_watch(void * ptr)
 
 void * rth_create_render(void * ptr)
 {
-    DMSG("creating main render thread");
+    DMSG("creating main render thread\n");
 
     rthdata* rth = (rthdata*)ptr;
     rthpridata* data = rth->data;
 
     if (!data->lines_rendered)
     {
-        DMSG("*** ERROR: lines rendered buffer not allocated ***");
+        DMSG("*** ERROR: lines rendered buffer not allocated ***\n");
     }
 
     pthread_mutex_lock(&data->lines_rendered_mutex);
@@ -296,7 +296,7 @@ void * rth_create_render(void * ptr)
     while (rth->thread_count > rh / 2)
         rth->thread_count /= 2;
 
-    DMSG_D("creating threads: count", rth->thread_count);
+    DMSG("creating threads: count %d", rth->thread_count);
 
     timer_start(&data->timing_info);
 
@@ -311,7 +311,7 @@ void * rth_create_render(void * ptr)
                             i, rc_err);
             return 0;
         }
-        DMSG("render thread created");
+        DMSG("render thread created\n");
     }
 
     pthread_mutex_lock(&data->started_mutex);
@@ -319,14 +319,14 @@ void * rth_create_render(void * ptr)
     pthread_cond_signal(&data->started_cond);
     pthread_mutex_unlock(&data->started_mutex);
 
-    DMSG("waiting for render threads to finish");
+    DMSG("waiting for render threads to finish\n");
 
     for (i = 0; i < rth->thread_count; ++i)
         pthread_join(data->threads[i], NULL);
 
     timer_stop(&data->timing_info);
 
-    DMSG("render threads finished");
+    DMSG("render threads finished\n");
 
     pthread_mutex_lock(&data->status_mutex);
     data->status = RT_STOP;
@@ -341,7 +341,7 @@ void * rth_create_render(void * ptr)
 
 void * rth_render(void * ptr)
 {
-    DMSG("starting main render loop");
+    DMSG("starting main render loop\n");
     rthdata* rth = (rthdata*)ptr;
     rthpridata* data = rth->data;
     int quit = 0;
@@ -397,7 +397,7 @@ void rth_ui_start_render(rthdata* rth)
 {
     rthpridata* data = rth->data;
     memset(rth->lines_drawn, 0, rth->img->user_height);
-    DMSG("rth_start_render, setting start");
+    DMSG("rth_start_render, setting start\n");
     rth->min_line_drawn = 0;
     pthread_mutex_lock(&data->start_mutex);
     pthread_cond_signal(&data->start_cond);
@@ -408,7 +408,7 @@ void rth_ui_start_render(rthdata* rth)
 
 void rth_ui_stop_render(rthdata* rth)
 {
-    DMSG("rth_stop_render");
+    DMSG("rth_stop_render\n");
     pthread_mutex_lock(&rth->data->status_mutex);
     rth->data->status = RT_STOP | (rth->data->status & RT_RENDERING);
     #ifdef DEBUG
@@ -420,7 +420,7 @@ void rth_ui_stop_render(rthdata* rth)
 
 void rth_ui_stop_render_and_wait(rthdata* rth)
 {
-    DMSG("rth_stop_render_and_wait");
+    DMSG("rth_stop_render_and_wait\n");
     pthread_mutex_lock(&rth->data->status_mutex);
 
     if (rth->data->status & RT_STOP) {
@@ -443,7 +443,7 @@ void rth_ui_stop_render_and_wait(rthdata* rth)
 
 void rth_ui_quit(rthdata* rth)
 {
-    DMSG("rth_quit");
+    DMSG("rth_quit\n");
     rthpridata* data = rth->data;
     /* set status to quit and signal start watch to wake up.. */
     pthread_mutex_lock(&data->status_mutex);
@@ -464,14 +464,14 @@ void rth_ui_quit(rthdata* rth)
 
 void rth_ui_wait_until_started(rthdata* rth)
 {
-    DMSG("***** waiting for started condition *****");
+    DMSG("***** waiting for started condition *****\n");
     rthpridata* data = rth->data;
     pthread_mutex_lock(&data->started_mutex);
     if (!rth->data->started)
         pthread_cond_wait(&data->started_cond, &data->started_mutex);
     pthread_cond_signal(&data->started_cond);
     pthread_mutex_unlock(&data->started_mutex);
-    DMSG("***** got started condition *****");
+    DMSG("***** got started condition *****\n");
 }
 
 
@@ -548,7 +548,7 @@ int rth_render_should_stop(rthdata* rth)
     pthread_mutex_unlock(&rth->data->status_mutex);
     #ifdef DEBUG
     if (ret) {
-        DMSG("rth_render_should_stop == TRUE")
+        DMSG("rth_render_should_stop == TRUE\n");
     }
     #endif
     return ret;

@@ -181,7 +181,7 @@ static void coords_update(GtkButton *button, coords_dialog* dl)
     mpfr_t n;
     int i;
 
-    DMSG("coords update..");
+    DMSG("coords update..\n");
 
     if (dl->center)
     {

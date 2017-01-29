@@ -70,7 +70,7 @@ image_info * image_info_create(int family, int fractal)
 
 void image_info_destroy(image_info* img)
 {
-    DMSG("freeing image_info data!");
+    DMSG("freeing image_info data!\n");
     mpfr_clear( img->xmin );
     mpfr_clear( img->xmax );
     mpfr_clear( img->ymax );
@@ -96,7 +96,7 @@ void image_info_destroy(image_info* img)
 
 void image_info_set(image_info* img, int w, int h, int aa_factor)
 {
-    DMSG("image_info_set");
+    DMSG("image_info_set\n");
     gboolean same_size;
 
     if ((img->user_width == w)
@@ -139,7 +139,7 @@ void image_info_set(image_info* img, int w, int h, int aa_factor)
 
 void image_info_switch_fractal(image_info* img, int real_px, int imag_py)
 {
-    DMSG("image_info_switch_fractal");
+    DMSG("image_info_switch_fractal\n");
 
     if (img->family == FAMILY_JULIA)
     {
@@ -175,7 +175,7 @@ void image_info_switch_fractal(image_info* img, int real_px, int imag_py)
 
 void image_info_threads_change(image_info* img, int thread_count)
 {
-    DMSG("image_info_threads_change");
+    DMSG("image_info_threads_change\n");
 
     img->thread_count = thread_count;
 
@@ -189,7 +189,7 @@ void image_info_threads_change(image_info* img, int thread_count)
         }
     }
 
-    DMSG("calling thread init...");
+    DMSG("calling thread init...\n");
     if (!rth_init((rthdata*)img->rth_ptr, img->thread_count,
                                           img->draw_lines,   img))
     {
@@ -219,7 +219,7 @@ void image_info_clear_image(image_info* img, bool raw, bool rgb)
 void image_info_set_multi_prec(image_info* img, bool use_multi_prec,
                                                 bool use_rounding)
 {
-    DMSG("image_info_set_multi_prec");
+    DMSG("image_info_set_multi_prec\n");
 
     rthdata* rth = (rthdata*)img->rth_ptr;
 
@@ -244,7 +244,7 @@ void image_info_set_multi_prec(image_info* img, bool use_multi_prec,
 
 void image_info_set_precision(image_info * img, mpfr_prec_t precision)
 {
-    DMSG("image_info_set_precision");
+    DMSG("image_info_set_precision\n");
 
     if (img->precision == precision)
         return;
@@ -387,9 +387,22 @@ int image_info_save_settings(image_info * img, FILE* fd)
         mpfr_out_str(fd, 10, 0, img->u.julia.c_im, GMP_RNDN);
     }
 
+
+
     fprintf(fd, "\n");
 
     fprintf(fd, "palette-offset %d\n", pal_offset);
+
+    fprintf(fd, "random-palette\n");
+    fprintf(fd, "red-strength %lf\n", img->rnd_pal->r_strength);
+    fprintf(fd, "red-bands %lf\n", img->rnd_pal->r_bands);
+    fprintf(fd, "green-strength %lf\n", img->rnd_pal->g_strength);
+    fprintf(fd, "green-bands %lf\n", img->rnd_pal->g_bands);
+    fprintf(fd, "blue-strength %lf\n", img->rnd_pal->b_strength);
+    fprintf(fd, "blue-bands %lf\n", img->rnd_pal->b_bands);
+    fprintf(fd, "rnd_offset %d\n", img->rnd_pal->offset);
+    fprintf(fd, "rnd_stripe %d\n", img->rnd_pal->stripe);
+    fprintf(fd, "rnd_spread %d\n", img->rnd_pal->spread);
 
     setlocale(LC_NUMERIC, loc);
 
@@ -446,7 +459,12 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
     int ret = 0;
     long paloff;
 
-    DMSG("image_info_load_settings");
+    double rnd_rs, rnd_rb, rnd_gs, rnd_gb, rnd_bs, rnd_bb;
+    long rnd_offset, rnd_stripe, rnd_spread;
+    int rndpal = 0;
+
+
+    DMSG("image_info_load_settings\n");
 
     mpfr_t cx, cy, size, xmin, xmax, ymax, j_re, j_im;
 
@@ -584,6 +602,57 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
     else
         pal_offset = 0;
 
+    if ((mdzfile_test_for_name(mf, "random-palette")))
+    {
+        DMSG("reading random-palette\n");
+        if (!mdzfile_get_double(mf, "red-strength", &rnd_rs, 0.0, 1.0))
+        {
+            mdzfile_err(mf, "Error in red-strength setting");
+            goto fail;
+        }
+        if (!mdzfile_get_double(mf, "red-bands", &rnd_rb, 0.0, 1.0))
+        {
+            mdzfile_err(mf, "Error in red-bands setting");
+            goto fail;
+        }
+        if (!mdzfile_get_double(mf, "green-strength", &rnd_gs, 0.0, 1.0))
+        {
+            mdzfile_err(mf, "Error in green-strength setting");
+            goto fail;
+        }
+        if (!mdzfile_get_double(mf, "green-bands", &rnd_gb, 0.0, 1.0))
+        {
+            mdzfile_err(mf, "Error in green-bands setting");
+            goto fail;
+        }
+        if (!mdzfile_get_double(mf, "blue-strength", &rnd_bs, 0.0, 1.0))
+        {
+            mdzfile_err(mf, "Error in blue-strength setting");
+            goto fail;
+        }
+        if (!mdzfile_get_double(mf, "blue-bands", &rnd_bb, 0.0, 1.0))
+        {
+            mdzfile_err(mf, "Error in blue-bands setting");
+            goto fail;
+        }
+        if (!mdzfile_get_long(mf, "rnd-offset", &rnd_offset, 0, 255))
+        {
+            mdzfile_err(mf, "Error in rnd-offset setting");
+            goto fail;
+        }
+        if (!mdzfile_get_long(mf, "rnd-stripe", &rnd_stripe, 0, 255))
+        {
+            mdzfile_err(mf, "Error in rnd-stripe setting");
+            goto fail;
+        }
+        if (!mdzfile_get_long(mf, "rnd-spread", &rnd_spread, 0, 255))
+        {
+            mdzfile_err(mf, "Error in rnd-spread setting");
+            goto fail;
+        }
+        rndpal = 1;
+    }
+
     if (!(w = img->user_width))
         w = DEFAULT_WIDTH;
     h = w / aspect;
@@ -597,6 +666,18 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
     img->palette_ip =   colip;
     coords_set_precision(img->pcoords, precision);
     image_info_set_precision(img, precision);
+
+    if (rndpal) {
+        img->rnd_pal->r_strength = rnd_rs;
+        img->rnd_pal->g_strength = rnd_gs;
+        img->rnd_pal->b_strength = rnd_bs;
+        img->rnd_pal->r_bands = rnd_rb;
+        img->rnd_pal->g_bands = rnd_gb;
+        img->rnd_pal->b_bands = rnd_bb;
+        img->rnd_pal->offset = rnd_offset;
+        img->rnd_pal->stripe = rnd_stripe;
+        img->rnd_pal->spread = rnd_spread;
+    }
 
     if (img->ui_ref_center)
     {
@@ -634,7 +715,7 @@ fail:
 
 int image_info_load_palette(mdzfile* mf)
 {
-    DMSG("image_info_load_palette");
+    DMSG("image_info_load_palette\n");
     char* palfile = 0;
 
     if (!mdzfile_read(mf))
@@ -652,7 +733,7 @@ int image_info_load_palette(mdzfile* mf)
 
 int image_info_load_all(image_info * img, int sect_flags, const char * fn)
 {
-    DMSG("image_info_load_all");
+    DMSG("image_info_load_all\n");
     if (!fn)
         return 0;
 

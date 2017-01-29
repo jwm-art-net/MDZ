@@ -19,8 +19,10 @@ random_palette   rnd_palette;
 function_palette fun_palette;
 char*            program_name = 0;
 
+#define BUFSZ 1024
 
 void duplicate(void);
+int cpu_count(void);
 
 void init_misc(void)
 {
@@ -51,7 +53,10 @@ void init_misc(void)
         opts.antialias = 1;
 
     if (!opts.threads)
-        opts.threads = DEFAULT_THREAD_COUNT;
+    {
+        if (!(opts.threads = cpu_count()))
+            opts.threads = DEFAULT_THREAD_COUNT;
+    }
 
     img->thread_count = opts.threads;
 
@@ -106,7 +111,7 @@ int main(int argc, char** argv)
             goto quit1;
         }
 
-        if (remove(opts.dumpfile) == -1)
+        if (0 && remove(opts.dumpfile) == -1)
         {
             perror("Can't delete temp file");
             /*  the code this is inherited from,
@@ -231,4 +236,36 @@ void duplicate(void)
         return;
     }
 
+}
+
+int cpu_count(void)
+{
+    FILE* f;
+    int cpu = 0;
+    char buf[BUFSZ];
+
+    if ((f = fopen("/proc/stat", "r")))
+    {
+        const char* id = buf + 3;
+        while (fgets(buf, BUFSZ, f) != NULL) {
+            if (strncmp(buf, "cpu", 3) == 0 && *id >= '0' && *id <= '9')
+                cpu++;
+        }
+        fclose(f);
+        if (cpu)
+            return cpu;
+    }
+
+    if ((f = fopen("/proc/cpuinfo", "r")))
+    {
+        while (fgets(buf, BUFSZ, f) != NULL) {
+            if (strncmp(buf, "processor", 9) == 0)
+                cpu++;
+        }
+        fclose(f);
+        if (cpu)
+            return cpu;
+    }
+
+    return 0;
 }

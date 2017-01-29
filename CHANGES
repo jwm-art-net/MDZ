@@ -1,6 +1,11 @@
 -------------------------------------------
 mdz-0.1.2
 
+CHANGES:
+
+* Estimate number of threads to use based upon
+  information in /proc (or revert to 2).
+
 FIXES:
 
 * Avoid seg-fault by waiting for all render threads

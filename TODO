@@ -1,5 +1,9 @@
+Todo that I can do:
+ * Button to pause-rendering.
+ * Show render time.
 
-Todo for consideration:
+Todo for consideration if I ever get betterer at maffs innit
+(or someone else does it for me):
 
  * investigate smooth colouring (instead of colour-bands)
  * investigate guessing algorithm + zoom optimization
@@ -8,3 +12,6 @@ Todo long term:
 
  * only draw parts of image that are necessary (ie after reposition).
  * more control over viewport scaling + resizing.
+ * rendering daemon that starts in background at boot time. connect via
+   networking to send jobs to. jobs queued, 1st come 1st served.
+
