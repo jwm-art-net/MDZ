@@ -393,16 +393,15 @@ int image_info_save_settings(image_info * img, FILE* fd)
 
     fprintf(fd, "palette-offset %d\n", pal_offset);
 
-    fprintf(fd, "random-palette\n");
-    fprintf(fd, "red-strength %lf\n", img->rnd_pal->r_strength);
-    fprintf(fd, "red-bands %lf\n", img->rnd_pal->r_bands);
-    fprintf(fd, "green-strength %lf\n", img->rnd_pal->g_strength);
-    fprintf(fd, "green-bands %lf\n", img->rnd_pal->g_bands);
-    fprintf(fd, "blue-strength %lf\n", img->rnd_pal->b_strength);
-    fprintf(fd, "blue-bands %lf\n", img->rnd_pal->b_bands);
-    fprintf(fd, "rnd_offset %d\n", img->rnd_pal->offset);
-    fprintf(fd, "rnd_stripe %d\n", img->rnd_pal->stripe);
-    fprintf(fd, "rnd_spread %d\n", img->rnd_pal->spread);
+    fprintf(fd, "r-strength %lf\n", img->rnd_pal->r_strength);
+    fprintf(fd, "r-bands %lf\n",    img->rnd_pal->r_bands);
+    fprintf(fd, "g-strength %lf\n", img->rnd_pal->g_strength);
+    fprintf(fd, "g-bands %lf\n",    img->rnd_pal->g_bands);
+    fprintf(fd, "b-strength %lf\n", img->rnd_pal->b_strength);
+    fprintf(fd, "b-bands %lf\n",    img->rnd_pal->b_bands);
+    fprintf(fd, "rnd-offset %d\n",  img->rnd_pal->offset);
+    fprintf(fd, "rnd-stripe %d\n",  img->rnd_pal->stripe);
+    fprintf(fd, "rnd-spread %d\n",  img->rnd_pal->spread);
 
     setlocale(LC_NUMERIC, loc);
 
@@ -591,7 +590,8 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
 
     if ((mdzfile_test_for_name(mf, paloff_str)))
     {
-        if (!setting_get_long(mf->line, paloff_str, &paloff, 0, 255))
+        /*if (!setting_get_long(mf->line, paloff_str, &paloff, 0, 255)) */
+        if (!mdzfile_get_long(mf, paloff_str, &paloff, 0, 255))
         {
             mdzfile_err(mf, "Error in palette offset setting");
             goto fail;
@@ -602,37 +602,36 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
     else
         pal_offset = 0;
 
-    if ((mdzfile_test_for_name(mf, "random-palette")))
+    if ((mdzfile_test_for_name(mf, "r-strength")))
     {
-        DMSG("reading random-palette\n");
-        if (!mdzfile_get_double(mf, "red-strength", &rnd_rs, 0.0, 1.0))
+        if (!mdzfile_get_double(mf, "r-strength", &rnd_rs, 0.0, 1.0))
         {
-            mdzfile_err(mf, "Error in red-strength setting");
+            mdzfile_err(mf, "Error in r-strength setting");
             goto fail;
         }
-        if (!mdzfile_get_double(mf, "red-bands", &rnd_rb, 0.0, 1.0))
+        if (!mdzfile_get_double(mf, "r-bands", &rnd_rb, 0.0, 1.0))
         {
-            mdzfile_err(mf, "Error in red-bands setting");
+            mdzfile_err(mf, "Error in r-bands setting");
             goto fail;
         }
-        if (!mdzfile_get_double(mf, "green-strength", &rnd_gs, 0.0, 1.0))
+        if (!mdzfile_get_double(mf, "g-strength", &rnd_gs, 0.0, 1.0))
         {
-            mdzfile_err(mf, "Error in green-strength setting");
+            mdzfile_err(mf, "Error in g-strength setting");
             goto fail;
         }
-        if (!mdzfile_get_double(mf, "green-bands", &rnd_gb, 0.0, 1.0))
+        if (!mdzfile_get_double(mf, "g-bands", &rnd_gb, 0.0, 1.0))
         {
-            mdzfile_err(mf, "Error in green-bands setting");
+            mdzfile_err(mf, "Error in g-bands setting");
             goto fail;
         }
-        if (!mdzfile_get_double(mf, "blue-strength", &rnd_bs, 0.0, 1.0))
+        if (!mdzfile_get_double(mf, "b-strength", &rnd_bs, 0.0, 1.0))
         {
-            mdzfile_err(mf, "Error in blue-strength setting");
+            mdzfile_err(mf, "Error in b-strength setting");
             goto fail;
         }
-        if (!mdzfile_get_double(mf, "blue-bands", &rnd_bb, 0.0, 1.0))
+        if (!mdzfile_get_double(mf, "b-bands", &rnd_bb, 0.0, 1.0))
         {
-            mdzfile_err(mf, "Error in blue-bands setting");
+            mdzfile_err(mf, "Error in b-bands setting");
             goto fail;
         }
         if (!mdzfile_get_long(mf, "rnd-offset", &rnd_offset, 0, 255))
@@ -668,6 +667,7 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
     image_info_set_precision(img, precision);
 
     if (rndpal) {
+        DMSG("setting random palette generation data.");
         img->rnd_pal->r_strength = rnd_rs;
         img->rnd_pal->g_strength = rnd_gs;
         img->rnd_pal->b_strength = rnd_bs;
