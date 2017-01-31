@@ -446,6 +446,17 @@ void do_image_info_save_dialog(image_info* img)
                         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
                         GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
                         NULL);
+
+    const char* lud = image_info_get_last_used_dir();
+    if (lud)
+        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), lud);
+
+    const char* luf = image_info_get_last_used_filename();
+    if (!luf)
+        luf = "untitled.mdz";
+
+    gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), luf);
+
     gtk_file_chooser_set_do_overwrite_confirmation (
                         GTK_FILE_CHOOSER (dialog), TRUE);
 
@@ -501,6 +512,10 @@ int do_image_info_load_dialog(image_info* img)
                         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
                         GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
                         NULL);
+
+    const char* lud = image_info_get_last_used_dir();
+    if (lud)
+        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dl), lud);
 
     frame = gtk_frame_new("Data to load");
     hbox = gtk_hbox_new(FALSE, 0);

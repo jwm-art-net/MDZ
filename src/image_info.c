@@ -9,15 +9,21 @@
 #include <math.h>
 #include <string.h>
 #include <locale.h>
+#include <libgen.h>
 
 #define DEFAULT_DEPTH           300
 #define DEFAULT_COLOUR_SCALE    1.0
 
 
 static const char* file_header = "mdz fractal settings";
+static char* last_used_dir = 0;
+static char* last_used_filename = 0;
+static char* last_used_filename_path = 0;
 
 const char* coords_str[] =  { "cx", "xmin", 0 };
 const char* paloff_str =  "palette-offset";
+
+static void set_last_used(const char* path);
 
 image_info * image_info_create(int family, int fractal)
 {
@@ -288,6 +294,7 @@ void image_info_reset_view(image_info* img)
     coords_reset(img->pcoords);
 
     img->ui_ref_center = TRUE;
+    image_info_reset_last_used_filename();
 }
 
 int image_info_save_all(image_info * img, const char * filename)
@@ -306,6 +313,7 @@ int image_info_save_all(image_info * img, const char * filename)
         return 0;
     }
     fclose(fd);
+    set_last_used(filename);
     return 1;
 }
 
@@ -773,6 +781,60 @@ int image_info_load_all(image_info * img, int sect_flags, const char * fn)
         }
     }
 
+    set_last_used(fn);
+
     mdzfile_close(mf);
     return 1;
+}
+
+
+static void set_last_used(const char* path)
+{
+    if (!path)
+        return;
+
+    if (last_used_dir && strcmp(last_used_dir, path) != 0) {
+        free(last_used_dir);
+        last_used_dir = 0;
+    }
+    if (!last_used_dir) {
+        last_used_dir = strdup(path);
+        last_used_dir = dirname(last_used_dir);
+    }
+    if (last_used_filename && strcmp(last_used_filename, path) != 0) {
+        free(last_used_filename);
+        last_used_filename = 0;
+    }
+    if (!last_used_filename) {
+        last_used_filename_path = strdup(path);
+        last_used_filename = basename(last_used_filename_path);
+    }
+}
+
+const char* image_info_get_last_used_dir(void)
+{
+    return last_used_dir;
+}
+
+const char* image_info_get_last_used_filename(void)
+{
+    return last_used_filename;
+}
+
+void image_info_reset_last_used_filename(void)
+{
+    if (last_used_filename_path) {
+        free(last_used_filename_path);
+        last_used_filename_path = 0;
+    }
+}
+
+void image_info_cleanup(void)
+{
+    if (last_used_dir) {
+        free(last_used_dir);
+        last_used_dir = 0;
+    }
+
+    image_info_reset_last_used_filename();
 }

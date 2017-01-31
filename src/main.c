@@ -163,7 +163,9 @@ int main(int argc, char** argv)
 
 quit1:
     image_info_destroy(img);
+    image_info_cleanup();
     palette_free();
+    my_png_cleanup();
 
 quit2:
     cleanup_opts();

@@ -86,7 +86,7 @@ typedef struct image_info
 
     random_palette* rnd_pal;    /* again... it's handy */
 
-    int real_width;             /* real size. differs from user_size */ 
+    int real_width;             /* real size. differs from user_size */
     int real_height;            /* if anti-aliasing is used */
     int user_width;
     int user_height;
@@ -154,5 +154,10 @@ void image_info_switch_fractal(image_info*, int j_real_px, int j_imag_py);
 #ifdef WITH_TMZ_CMDLINE
 void image_tmz_save_settings(image_info * img, FILE* fd);
 #endif
+
+const char* image_info_get_last_used_dir(void);
+const char* image_info_get_last_used_filename(void);
+void image_info_reset_last_used_filename(void);
+void image_info_cleanup(void);
 
 #endif
