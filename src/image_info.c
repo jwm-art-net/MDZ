@@ -5,6 +5,7 @@
 #include "render_threads.h"
 #include "setting.h"
 #include "fractal.h"
+#include "my_png.h"
 
 #include <math.h>
 #include <string.h>
@@ -295,6 +296,7 @@ void image_info_reset_view(image_info* img)
 
     img->ui_ref_center = TRUE;
     image_info_reset_last_used_filename();
+    my_png_reset_last_used_filename();
 }
 
 int image_info_save_all(image_info * img, const char * filename)
@@ -826,6 +828,7 @@ void image_info_reset_last_used_filename(void)
     if (last_used_filename_path) {
         free(last_used_filename_path);
         last_used_filename_path = 0;
+        last_used_filename = 0;
     }
 }
 

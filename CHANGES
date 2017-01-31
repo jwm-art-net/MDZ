@@ -6,6 +6,13 @@ CHANGES:
 * Estimate number of threads to use based upon
   information in /proc (or revert to 2).
 
+* Colour randomization settings now saved in
+  file (so now get transmitted to new windows).
+
+* File Load/Save dialogs now remember last used
+  directory & filename. PNG save takes name from
+  last used MDZ directory/filename.
+
 FIXES:
 
 * Avoid seg-fault by waiting for all render threads
@@ -16,6 +23,12 @@ FIXES:
 
 * Update colour scale value in palette dialog after
   'Reset zoom'.
+
+* Load settings file before processing command line
+  options which specifiy width or height or aspect
+  ratio. This fixes unexpected behaviour when only
+  height was specified alongside a file with a non
+  default aspect ratio.
 
 -------------------------------------------
 mdz-0.1.1

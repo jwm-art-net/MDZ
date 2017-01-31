@@ -129,10 +129,14 @@ void do_png_save(image_info* img)
     const char* luf = my_png_get_last_used_filename();
     if (!luf) {
         luf = image_info_get_last_used_filename();
-        free_luf = strdup(luf);
-        char* p = strrchr(free_luf,'.');
-        *++p = 'p'; *++p = 'n'; *++p = 'g';
-        luf = free_luf;
+        if (luf) {
+            char* p = strrchr(luf,'.');
+            size_t xp = p - luf;
+            free_luf = malloc(xp + 5);
+            strncpy(free_luf, luf, xp);
+            strcpy(free_luf + xp, ".png");
+            luf = free_luf;
+        }
     }
     if (!luf)
         luf = "untitled.png";
@@ -197,6 +201,7 @@ void my_png_reset_last_used_filename(void)
     if (last_used_filename_path) {
         free(last_used_filename_path);
         last_used_filename_path = 0;
+        last_used_filename = 0;
     }
 }
 
