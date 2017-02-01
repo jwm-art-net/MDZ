@@ -10,7 +10,6 @@
 #include <math.h>
 #include <string.h>
 #include <locale.h>
-#include <libgen.h>
 
 #define DEFAULT_DEPTH           300
 #define DEFAULT_COLOUR_SCALE    1.0
