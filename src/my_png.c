@@ -11,18 +11,14 @@
 #include "my_png.h"
 #include "main_gui.h"
 #include "misc_gui.h"
+#include "last_used.h"
 
 /* should be using autoconf... */
 #if PNG_LIBPNG_VER <= 10002
 #error Your libpng is too old. Upgrade to at least version 1.0.3
 #endif
 
-
-static char* last_used_dir = 0;
-static char* last_used_filename = 0;
-static char* last_used_filename_path = 0;
-
-static void set_last_used(const char* path);
+static last_used* lastused = 0;
 
 
 void save_png_file(image_info* img, char* filename)
@@ -120,7 +116,11 @@ void do_png_save(image_info* img)
 
     char* free_luf = 0;
 
-    const char* lud = my_png_get_last_used_dir();
+    if (!lastused)
+        lastused = last_used_create(".png");
+
+    const char* lud = last_used_dir(lastused);
+
     if (!lud)
         lud = image_info_get_last_used_dir();
     if (lud)

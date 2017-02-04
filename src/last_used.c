@@ -13,7 +13,7 @@ struct _last_used
     char* name;
     char* ext;
     char* filename_path;
-    last_used* cf;
+    const last_used* cf;
 };
 
 
@@ -85,7 +85,7 @@ char* last_used_suggest(last_used* lu)
     const char* lun = lu->name;
 
     if (!lun) {
-        lun = last_used_get_name(cf);
+        lun = last_used_get_name(lu->cf);
         if (!lun)
             lun = "untitled";
     }
