@@ -5,6 +5,7 @@
 #include "cmdline.h"
 #include "fractal.h"
 #include "image_info.h"
+#include "last_used.h"
 #include "main.h"
 #include "main_gui.h"
 #include "my_png.h"
@@ -91,6 +92,8 @@ int main(int argc, char** argv)
     rnd_palette.stripe = 1.0;
     rnd_palette.spread = 1.0;
 
+    last_used_init();
+
     if (!palette_init())
         palette_randomize(&rnd_palette);
 
@@ -162,10 +165,9 @@ int main(int argc, char** argv)
         gui_init(&argc, &argv, img);
 
 quit1:
+    last_used_cleanup();
     image_info_destroy(img);
-    image_info_cleanup();
     palette_free();
-    my_png_cleanup();
 
 quit2:
     cleanup_opts();

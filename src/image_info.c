@@ -1,11 +1,12 @@
 #include "image_info.h"
 
 #include "debug.h"
+#include "fractal.h"
+#include "last_used.h"
+#include "my_png.h"
 #include "palette.h"
 #include "render_threads.h"
 #include "setting.h"
-#include "fractal.h"
-#include "my_png.h"
 
 #include <math.h>
 #include <string.h>
@@ -16,14 +17,10 @@
 
 
 static const char* file_header = "mdz fractal settings";
-static char* last_used_dir = 0;
-static char* last_used_filename = 0;
-static char* last_used_filename_path = 0;
 
 const char* coords_str[] =  { "cx", "xmin", 0 };
 const char* paloff_str =  "palette-offset";
 
-static void set_last_used(const char* path);
 
 image_info * image_info_create(int family, int fractal)
 {
@@ -294,8 +291,8 @@ void image_info_reset_view(image_info* img)
     coords_reset(img->pcoords);
 
     img->ui_ref_center = TRUE;
-    image_info_reset_last_used_filename();
-    my_png_reset_last_used_filename();
+    last_used_reset_filename(LU_MDZ);
+    last_used_reset_filename(LU_PNG);
 }
 
 int image_info_save_all(image_info * img, const char * filename)
@@ -304,7 +301,6 @@ int image_info_save_all(image_info * img, const char * filename)
     if (!fd)
     {
         fprintf(stderr, "Failed open file: %s for writing\n", filename);
-        fclose(fd);
         return 0;
     }
     if (!image_info_f_save_all(img, fd))
@@ -314,7 +310,7 @@ int image_info_save_all(image_info * img, const char * filename)
         return 0;
     }
     fclose(fd);
-    set_last_used(filename);
+    last_used_set_file(LU_MDZ, filename);
     return 1;
 }
 
@@ -331,7 +327,7 @@ int image_info_f_save_all(image_info * img, FILE* fd)
     }
 
     fprintf(fd, "palette\n");
-    const char* pfn = palette_get_filename();
+    const char* pfn = last_used_get_filename(LU_MAP);
     if (pfn)
         fprintf(fd, "file %s\n", pfn);
     else
@@ -728,8 +724,10 @@ int image_info_load_palette(mdzfile* mf)
     if (!mdzfile_read(mf))
         return mdzfile_err(mf, "palette missing data\n");
 
-    if (strcmp(mf->line, "data") == 0)
+    if (strcmp(mf->line, "data") == 0) {
+        last_used_reset_filename(LU_MAP);
         return palette_read(mf->f);
+    }
 
     if ((palfile = setting_get_str(mf->line, "file")))
         return palette_load(palfile);
@@ -778,65 +776,13 @@ int image_info_load_all(image_info * img, int sect_flags, const char * fn)
                             "Got '%s' instead.\n",
                             mf->line );
             mdzfile_close(mf);
-            return 0;
         }
+            return 0;
     }
 
-    set_last_used(fn);
+    last_used_set_file(LU_MDZ, fn);
 
     mdzfile_close(mf);
     return 1;
 }
 
-
-static void set_last_used(const char* path)
-{
-    if (!path)
-        return;
-
-    if (last_used_dir && strcmp(last_used_dir, path) != 0) {
-        free(last_used_dir);
-        last_used_dir = 0;
-    }
-    if (!last_used_dir) {
-        last_used_dir = strdup(path);
-        last_used_dir = dirname(last_used_dir);
-    }
-    if (last_used_filename && strcmp(last_used_filename, path) != 0) {
-        free(last_used_filename);
-        last_used_filename = 0;
-    }
-    if (!last_used_filename) {
-        last_used_filename_path = strdup(path);
-        last_used_filename = basename(last_used_filename_path);
-    }
-}
-
-const char* image_info_get_last_used_dir(void)
-{
-    return last_used_dir;
-}
-
-const char* image_info_get_last_used_filename(void)
-{
-    return last_used_filename;
-}
-
-void image_info_reset_last_used_filename(void)
-{
-    if (last_used_filename_path) {
-        free(last_used_filename_path);
-        last_used_filename_path = 0;
-        last_used_filename = 0;
-    }
-}
-
-void image_info_cleanup(void)
-{
-    if (last_used_dir) {
-        free(last_used_dir);
-        last_used_dir = 0;
-    }
-
-    image_info_reset_last_used_filename();
-}

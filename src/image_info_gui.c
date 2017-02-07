@@ -5,10 +5,11 @@
 #include <mpfr.h>
 
 #include "debug.h"
-#include "my_mpfr_to_str.h"
+#include "last_used.h"
 #include "main.h"
 #include "main_gui.h"
 #include "misc_gui.h"
+#include "my_mpfr_to_str.h"
 #include "render_threads.h"
 
 static GtkWidget* check_button_fractal = 0;
@@ -447,15 +448,14 @@ void do_image_info_save_dialog(image_info* img)
                         GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
                         NULL);
 
-    const char* lud = image_info_get_last_used_dir();
+    const char* lud = last_used_suggest_dir(LU_MDZ);
     if (lud)
         gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), lud);
 
-    const char* luf = image_info_get_last_used_filename();
-    if (!luf)
-        luf = "untitled.mdz";
+    const char* luf = last_used_suggest_filename(LU_MDZ, fractal_str[img->fractal]);
 
-    gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), luf);
+    if (luf)
+        gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), luf);
 
     gtk_file_chooser_set_do_overwrite_confirmation (
                         GTK_FILE_CHOOSER (dialog), TRUE);
@@ -513,7 +513,7 @@ int do_image_info_load_dialog(image_info* img)
                         GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
                         NULL);
 
-    const char* lud = image_info_get_last_used_dir();
+    const char* lud = last_used_get_dir(LU_MDZ);
     if (lud)
         gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dl), lud);
 

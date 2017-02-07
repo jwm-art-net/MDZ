@@ -1,8 +1,10 @@
+#include "palette.h"
+
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "palette.h"
+#include "last_used.h"
 #include "main_gui.h"
 
 #define BUF_SIZE 256
@@ -32,27 +34,9 @@ static const char* pal_path[] = {
 
 static char* pal_paths[12] = { 0 };
 
-/* keep the current palette's filename around */
-static char* _filename = 0;
 
 
-static void reset_filename(void)
-{
-    if (_filename)
-    {
-        free(_filename);
-        _filename = 0;
-    }
-}
 
-
-static void set_filename(const char* filename)
-{
-    reset_filename();
-    int len = strlen(filename);
-    _filename = malloc(len * sizeof(char) + 1);
-    strcpy(_filename, filename);
-}
 
 
 int palette_init(void)
@@ -132,7 +116,7 @@ int palette_load(char* filename)
         return 0;
     }
 
-    set_filename(filename);
+    last_used_set_file(LU_MAP, filename);
 
     fclose(fp);
     return 1;
@@ -143,11 +127,6 @@ int palette_read(FILE* fd)
 {
     int i,r,g,b;
     char buf[BUF_SIZE];
-
-    reset_filename(); /* ie on startup the default palette is loaded,
-                         and then when a settings file is loaded with
-                         an embedded palette within it, this func is
-                         called, so reset_filename needs to be here! */
 
     i = 0;
     while (fgets(buf, BUF_SIZE, fd) != NULL) {
@@ -181,7 +160,7 @@ int palette_save(char* filename)
         return 0;
     }
 
-    set_filename(filename);
+    last_used_set_file(LU_MAP, filename);
 
     fclose(fp);
     return 1;
@@ -204,11 +183,6 @@ int palette_write(FILE* fd)
 }
 
 
-char* palette_get_filename(void)
-{
-    return _filename;
-}
-
 
 void palette_randomize(random_palette* rnd_pal)
 {
@@ -230,7 +204,7 @@ void palette_randomize(random_palette* rnd_pal)
     if (rnd_pal == 0)
         return;
 
-    reset_filename();
+    last_used_reset_filename(LU_MAP);
 
     if (rnd_pal->r_strength == 0)
         rnd_pal->r_strength = 0.01;
@@ -260,11 +234,11 @@ void palette_randomize(random_palette* rnd_pal)
     rnd_b = malloc(sizeof(*rnd_b) * (b_bandcount + 1));
 
     for (i = 0; i < r_bandcount; i++)
-        rnd_r[i] = r_hsm - 255 * 
+        rnd_r[i] = r_hsm - 255 *
             ((double)rand() / RAND_MAX) * rnd_pal->r_strength;
 
     for (i = 0; i < g_bandcount; i++)
-        rnd_g[i] = g_hsm - 255 * 
+        rnd_g[i] = g_hsm - 255 *
             ((double)rand() / RAND_MAX) * rnd_pal->g_strength;
 
     for (i = 0; i < b_bandcount; i++)
@@ -325,7 +299,7 @@ void palette_apply_func(function_palette* funpal)
     int i;
     guint32 r, g, b;
 
-    reset_filename();
+    last_used_reset_filename(LU_MAP);
 
     for (i = 0; i < pal_indexes; i++) {
         r = RED(palette[i]);
@@ -399,7 +373,6 @@ void palette_free()
 
     while(pal_paths[pp])
         free(pal_paths[pp++]);
-    reset_filename();
 }
 
 

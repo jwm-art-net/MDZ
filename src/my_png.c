@@ -18,8 +18,6 @@
 #error Your libpng is too old. Upgrade to at least version 1.0.3
 #endif
 
-static last_used* lastused = 0;
-
 
 void save_png_file(image_info* img, char* filename)
 {
@@ -116,32 +114,15 @@ void do_png_save(image_info* img)
 
     char* free_luf = 0;
 
-    if (!lastused)
-        lastused = last_used_create(".png");
+    const char* lud = last_used_suggest_dir(LU_PNG);
 
-    const char* lud = last_used_dir(lastused);
-
-    if (!lud)
-        lud = image_info_get_last_used_dir();
     if (lud)
         gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), lud);
 
-    const char* luf = my_png_get_last_used_filename();
-    if (!luf) {
-        luf = image_info_get_last_used_filename();
-        if (luf) {
-            char* p = strrchr(luf,'.');
-            size_t xp = p - luf;
-            free_luf = malloc(xp + 5);
-            strncpy(free_luf, luf, xp);
-            strcpy(free_luf + xp, ".png");
-            luf = free_luf;
-        }
-    }
-    if (!luf)
-        luf = "untitled.png";
+    const char* luf = last_used_suggest_filename(LU_PNG, NULL);
 
-    gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), luf);
+    if (luf)
+        gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), luf);
 
     gui_file_chooser_add_filter(dialog, "PNG files", "*.png");
     gui_file_chooser_add_filter(dialog, "All files", "*");
@@ -154,7 +135,7 @@ void do_png_save(image_info* img)
         filename = gtk_file_chooser_get_filename(
                         GTK_FILE_CHOOSER(dialog));
         save_png_file(img, filename);
-        set_last_used(filename);
+        last_used_set_file(LU_PNG, filename);
         g_free(filename);
     }
     if (free_luf)
@@ -162,55 +143,3 @@ void do_png_save(image_info* img)
     gtk_widget_destroy (dialog);
 }
 
-
-static void set_last_used(const char* path)
-{
-    if (!path)
-        return;
-
-    if (last_used_dir && strcmp(last_used_dir, path) != 0) {
-        free(last_used_dir);
-        last_used_dir = 0;
-    }
-    if (!last_used_dir) {
-        last_used_dir = strdup(path);
-        last_used_dir = dirname(last_used_dir);
-    }
-    if (last_used_filename && strcmp(last_used_filename, path) != 0) {
-        free(last_used_filename);
-        last_used_filename = 0;
-    }
-    if (!last_used_filename) {
-        last_used_filename_path = strdup(path);
-        last_used_filename = basename(last_used_filename_path);
-    }
-}
-
-const char* my_png_get_last_used_dir(void)
-{
-    return last_used_dir;
-}
-
-const char* my_png_get_last_used_filename(void)
-{
-    return last_used_filename;
-}
-
-void my_png_reset_last_used_filename(void)
-{
-    if (last_used_filename_path) {
-        free(last_used_filename_path);
-        last_used_filename_path = 0;
-        last_used_filename = 0;
-    }
-}
-
-void my_png_cleanup(void)
-{
-    if (last_used_dir) {
-        free(last_used_dir);
-        last_used_dir = 0;
-    }
-
-    my_png_reset_last_used_filename();
-}

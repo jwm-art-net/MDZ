@@ -4,7 +4,7 @@
 #include <string.h>
 #include <libgen.h>
 
-
+#include "debug.h"
 
 typedef struct _last_used
 {
@@ -13,12 +13,15 @@ typedef struct _last_used
     char* name;
     char* ext;
     char* filename_path;
+    char* suggested;
 } last_used;
 
 
+static char* workspace = 0;
 static last_used* mdz_lu = 0;
 static last_used* png_lu = 0;
 static last_used* map_lu = 0;
+static const char* untitled="untitled";
 
 static last_used*  _get_lu(lu_type lt)
 {
@@ -29,6 +32,13 @@ static last_used*  _get_lu(lu_type lt)
       default:          return 0;
     }
 }
+
+
+lu_type prece[LU_XXX_LAST][LU_XXX_LAST - 1] = {
+                            { 0, 0, 0 },
+                            { LU_PNG, LU_XXX_LAST },
+                            { LU_MDZ, LU_XXX_LAST },
+                            { LU_MDZ, LU_PNG, LU_XXX_LAST }  };
 
 
 static last_used*  _last_used_create(const char* ext)
@@ -52,14 +62,15 @@ static void _last_used_free(last_used* lu)
 {
     if (lu->dir)
         free(lu->dir);
-    if (lu->filename)
-        free(lu->filename);
+    /* filename is basename() derived */
     if (lu->name)
         free(lu->name);
     if (lu->ext)
         free(lu->ext);
     if (lu->filename_path)
         free(lu->filename_path);
+    if (lu->suggested)
+        free(lu->suggested);
     free(lu);
 }
 
@@ -79,8 +90,9 @@ void last_used_cleanup(void)
 }
 
 
-void last_used_set(lu_type lt, const char* path)
+void last_used_set_file(lu_type lt, const char* path)
 {
+    DMSG("type: %s, path:'%s'\n", _get_lu(lt)->ext, path);
     if (!path)
         return;
 
@@ -94,33 +106,83 @@ void last_used_set(lu_type lt, const char* path)
         lu->dir = strdup(path);
         lu->dir = dirname(lu->dir);
     }
-    if (lu->filename && strcmp(lu->filename, path) != 0) {
-        free(lu->filename);
-        lu->filename = 0;
-    }
     if (!lu->filename) {
         lu->filename_path = strdup(path);
         lu->filename = basename(lu->filename_path);
+        const char* dp = strrchr(lu->filename, '.');
+        if (!dp)
+            lu->name = strdup(lu->filename);
+        else {
+            size_t nl = dp - lu->filename;
+            lu->name = malloc(nl + 1);
+            strncpy(lu->name, lu->filename, nl);
+            *(lu->name + nl) = '\0';
+        }
     }
 }
 
 
-char* last_used_suggest(lu_type lt)
+const char* last_used_suggest_dir(lu_type lt)
 {
     last_used* lu = _get_lu(lt);
 
-    const char* lun = lu->name;
+    if (lu->dir)
+        return lu->dir;
 
-    if (!lun) {
-        lun = last_used_get_name(lt);
-        if (!lun)
-            lun = "untitled";
+    const char* dir = 0;
+
+    for (int l = 0; prece[lt][l] != LU_XXX_LAST; ++l) {
+        DMSG("checking %s name for %s\n", _get_lu(lt)->ext, _get_lu(prece[lt][l])->ext);
+        if ((dir = last_used_get_dir(prece[lt][l])))
+            return dir;
+    }
+
+    return 0;
+}
+
+
+const char* last_used_suggest_filename(lu_type lt, const char* append)
+{
+    last_used* lu = _get_lu(lt);
+
+    if (lu->filename)
+        return lu->filename;
+
+    const char* lun = 0;
+
+    for (int l = 0; prece[lt][l] != LU_XXX_LAST; ++l) {
+        DMSG("checking %s name for %s\n", _get_lu(lt)->ext, _get_lu(prece[lt][l])->ext);
+        if ((lun = last_used_get_name(prece[lt][l])))
+            break;
+    }
+
+
+    DMSG("lun '%s'\n", lun);
+
+    if (!lun)
+        lun = untitled;
+
+    if (lu->suggested) {
+        free(lu->suggested);
+        lu->suggested = 0;
     }
 
     size_t ll = strlen(lun);
-    char* ret = malloc(ll + strlen(lu->ext) + 1);
-    strcpy(ret, lun);
-    strcpy(ret + ll, lu->ext);
+    size_t al = (append ? (strlen(append) + 1) : 0);
+    size_t tl = ll + al + strlen(lu->ext) + 1;
+
+    lu->suggested = malloc(tl);
+    strcpy(lu->suggested, lun);
+
+    if (lun == untitled && append) {
+        *(lu->suggested + ll) = '-';
+        strcpy(lu->suggested + ll + 1, append);
+        strcpy(lu->suggested + ll + al, lu->ext);
+    }
+    else
+        strcpy(lu->suggested + ll, lu->ext);
+
+    return lu->suggested;
 }
 
 
