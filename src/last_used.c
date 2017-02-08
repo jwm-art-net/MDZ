@@ -8,11 +8,11 @@
 
 typedef struct _last_used
 {
-    char* dir;
+    char* basedir;
     char* filename;
     char* name;
     char* ext;
-    char* filename_path;
+    char* filepath;
     char* suggested;
 } last_used;
 
@@ -60,15 +60,15 @@ static last_used*  _last_used_create(const char* ext)
 
 static void _last_used_free(last_used* lu)
 {
-    if (lu->dir)
-        free(lu->dir);
+    if (lu->basedir)
+        free(lu->basedir);
     /* filename is basename() derived */
     if (lu->name)
         free(lu->name);
     if (lu->ext)
         free(lu->ext);
-    if (lu->filename_path)
-        free(lu->filename_path);
+    if (lu->filepath)
+        free(lu->filepath);
     if (lu->suggested)
         free(lu->suggested);
     free(lu);
@@ -98,17 +98,17 @@ void last_used_set_file(lu_type lt, const char* path)
 
     last_used* lu = _get_lu(lt);
 
-    if (lu->dir && strcmp(lu->dir, path) != 0) {
-        free(lu->dir);
-        lu->dir = 0;
+    if (lu->basedir && strcmp(lu->basedir, path) != 0) {
+        free(lu->basedir);
+        lu->basedir = 0;
     }
-    if (!lu->dir) {
-        lu->dir = strdup(path);
-        lu->dir = dirname(lu->dir);
+    if (!lu->basedir) {
+        lu->basedir = strdup(path);
+        lu->basedir = dirname(lu->basedir);
     }
     if (!lu->filename) {
-        lu->filename_path = strdup(path);
-        lu->filename = basename(lu->filename_path);
+        lu->filepath = strdup(path);
+        lu->filename = basename(lu->filepath);
         const char* dp = strrchr(lu->filename, '.');
         if (!dp)
             lu->name = strdup(lu->filename);
@@ -119,6 +119,13 @@ void last_used_set_file(lu_type lt, const char* path)
             *(lu->name + nl) = '\0';
         }
     }
+    DMSG("lu->basedir: %s\n",lu->basedir);
+    DMSG("lu->filename %s\n",lu->filename);
+    DMSG("lu->name %s\n",lu->name);
+    DMSG("lu->ext %s\n",lu->ext);
+    DMSG("lu->filepath %s\n",lu->filepath);
+    DMSG("lu->suggested %s\n",lu->suggested);
+
 }
 
 
@@ -126,14 +133,14 @@ const char* last_used_suggest_dir(lu_type lt)
 {
     last_used* lu = _get_lu(lt);
 
-    if (lu->dir)
-        return lu->dir;
+    if (lu->basedir)
+        return lu->basedir;
 
     const char* dir = 0;
 
     for (int l = 0; prece[lt][l] != LU_XXX_LAST; ++l) {
         DMSG("checking %s name for %s\n", _get_lu(lt)->ext, _get_lu(prece[lt][l])->ext);
-        if ((dir = last_used_get_dir(prece[lt][l])))
+        if ((dir = last_used_get_basedir(prece[lt][l])))
             return dir;
     }
 
@@ -196,9 +203,9 @@ const char* last_used_get_ext(lu_type lt)
     return _get_lu(lt)->ext;
 }
 
-const char* last_used_get_dir(lu_type lt)
+const char* last_used_get_basedir(lu_type lt)
 {
-    return _get_lu(lt)->dir;
+    return _get_lu(lt)->basedir;
 }
 
 const char* last_used_get_filename(lu_type lt)
@@ -206,12 +213,18 @@ const char* last_used_get_filename(lu_type lt)
     return _get_lu(lt)->filename;
 }
 
+const char* last_used_get_filepath(lu_type lt)
+{
+    return _get_lu(lt)->filepath;
+}
+
 void last_used_reset_filename(lu_type lt)
 {
+    DMSG("resetting filename...\n");
     last_used* lu = _get_lu(lt);
-    if (lu->filename_path) {
-        free(lu->filename_path);
-        lu->filename_path = 0;
+    if (lu->filepath) {
+        free(lu->filepath);
+        lu->filepath = 0;
         lu->filename = 0;
         lu->name = 0;
     }

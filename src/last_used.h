@@ -19,10 +19,10 @@ void  last_used_cleanup(void);
 
 void  last_used_set_file(lu_type, const char* filepath);
 
-/* return last used xxx, otherwise NULL  */
 const char* last_used_get_name(lu_type);
-const char* last_used_get_dir(lu_type);
+const char* last_used_get_basedir(lu_type);
 const char* last_used_get_filename(lu_type);
+const char* last_used_get_filepath(lu_type);
 
 const char* last_used_suggest_dir(lu_type);
 const char* last_used_suggest_filename(lu_type, const char* untitled_append);

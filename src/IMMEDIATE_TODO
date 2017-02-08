@@ -1,0 +1,3 @@
+* check sanity of last used code, memory leaks, etc
+* check behaviour in response to files that fail to load
+

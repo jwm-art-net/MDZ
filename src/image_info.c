@@ -109,6 +109,8 @@ void image_info_set(image_info* img, int w, int h, int aa_factor)
     else
         same_size = FALSE;
 
+    DMSG("same_size == %s\n", same_size ? "TRUE" : "FALSE");
+
     if (!same_size)
         free(img->rgb_data);
 
@@ -276,9 +278,9 @@ void image_info_set_precision(image_info * img, mpfr_prec_t precision)
 }
 
 
-
 void image_info_reset_view(image_info* img)
 {
+    DMSG("reseting view\n");
     img->depth =        DEFAULT_DEPTH;
 
     img->precision =    DEFAULT_PRECISION;
@@ -327,7 +329,7 @@ int image_info_f_save_all(image_info * img, FILE* fd)
     }
 
     fprintf(fd, "palette\n");
-    const char* pfn = last_used_get_filename(LU_MAP);
+    const char* pfn = last_used_get_filepath(LU_MAP);
     if (pfn)
         fprintf(fd, "file %s\n", pfn);
     else
@@ -744,15 +746,19 @@ int image_info_load_all(image_info * img, int sect_flags, const char * fn)
 
     mdzfile* mf = mdzfile_read_open(fn);
 
-    if (!mf)
+    if (!mf) {
+        DMSG("failed to open file '%s'\n", fn);
         return 0;
+    }
 
     if (sect_flags & MDZ_FRACTAL_SETTINGS)
     {
         if (mdzfile_read(mf))
         {
-            if (!image_info_load_settings(img, mf))
+            if (!image_info_load_settings(img, mf)) {
+                DMSG("failed to load settings '%s'\n", fn);
                 return 0;
+            }
         }
         else
         {
@@ -767,8 +773,11 @@ int image_info_load_all(image_info * img, int sect_flags, const char * fn)
     {
         if (mdzfile_skip_to(mf, "palette"))
         {
-            if (!image_info_load_palette(mf))
-                return 0;
+            if (!image_info_load_palette(mf)) {
+                /* FIXME: decide on sensible option here */
+                DMSG("failed to load palette data for '%s'\n", fn);
+                /* return 0; no point punishing user */
+            }
         }
         else
         {
@@ -776,8 +785,8 @@ int image_info_load_all(image_info * img, int sect_flags, const char * fn)
                             "Got '%s' instead.\n",
                             mf->line );
             mdzfile_close(mf);
-        }
             return 0;
+        }
     }
 
     last_used_set_file(LU_MDZ, fn);

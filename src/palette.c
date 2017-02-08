@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
 #include "last_used.h"
 #include "main_gui.h"
 
@@ -89,6 +90,7 @@ int palette_init(void)
     }
     if (palfile)
     {
+        DMSG("init palette: '%s'\n", palfile);
         if (palette_load(palfile))
             done = 1;
         free(palfile);
@@ -105,6 +107,7 @@ char ** palette_get_paths()
 
 int palette_load(char* filename)
 {
+    DMSG("loading '%s'\n", filename);
     FILE* fp = fopen(filename, "r");
     if (fp == NULL)
         return 0;
