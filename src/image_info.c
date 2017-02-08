@@ -3,6 +3,7 @@
 #include "debug.h"
 #include "fractal.h"
 #include "last_used.h"
+#include "mdzfileio.h"
 #include "my_png.h"
 #include "palette.h"
 #include "render_threads.h"
@@ -15,8 +16,6 @@
 #define DEFAULT_DEPTH           300
 #define DEFAULT_COLOUR_SCALE    1.0
 
-
-static const char* file_header = "mdz fractal settings";
 
 const char* coords_str[] =  { "cx", "xmin", 0 };
 const char* paloff_str =  "palette-offset";
@@ -305,7 +304,7 @@ int image_info_save_all(image_info * img, const char * filename)
         fprintf(stderr, "Failed open file: %s for writing\n", filename);
         return 0;
     }
-    if (!image_info_f_save_all(img, fd))
+    if (!image_info_f_save_all(img, fd, MDZ_NORMAL))
     {
         fprintf(stderr, "Error writing settings file: %s\n", filename);
         fclose(fd);
@@ -317,9 +316,17 @@ int image_info_save_all(image_info * img, const char * filename)
 }
 
 
-int image_info_f_save_all(image_info * img, FILE* fd)
+int image_info_f_save_all(image_info * img, FILE* fd, int mdz_flags)
 {
-    fprintf(fd, "%s %s\n", file_header, VERSION);
+    if (mdz_flags & MDZ_DUPLICATE) {
+        fprintf(fd, "%s %s\n", mdz_dump_header, VERSION);
+        const char* tmp = last_used_get_filepath(LU_MDZ);
+        fprintf(fd, "lu-mdz %s\n", tmp ? tmp : "(NULL)");
+        tmp = last_used_get_filepath(LU_PNG);
+        fprintf(fd, "lu-png %s\n", tmp ? tmp : "(NULL)");
+    }
+    else
+        fprintf(fd, "%s %s\n", mdz_file_header, VERSION);
 
     if (!image_info_save_settings(img, fd))
     {
@@ -337,6 +344,7 @@ int image_info_f_save_all(image_info * img, FILE* fd)
         fprintf(fd, "data\n");
         palette_write(fd);
     }
+
     return 1;
 }
 
@@ -494,8 +502,10 @@ int image_info_load_settings(image_info * img, mdzfile* mf)
             return mdzfile_err(mf, "error in fractal setting");
     }
 
-    if (!mdzfile_get_long(mf, "depth", &depth, MIN_DEPTH, MAX_DEPTH))
+    if (!mdzfile_get_long(mf, "depth", &depth, MIN_DEPTH, MAX_DEPTH)) {
+        DMSG("mdzfile line:'%s'\n", mf->line);
         return mdzfile_err(mf, "Error in depth setting");
+    }
 
     if (!mdzfile_get_double(mf, "aspect", &aspect, 1e-20f, 1e20f))
         return mdzfile_err(mf, "Error in aspect setting");
@@ -751,6 +761,23 @@ int image_info_load_all(image_info * img, int sect_flags, const char * fn)
         return 0;
     }
 
+    if (mf->flags & MDZ_DUPLICATE) {
+        DMSG("DUPLICATE\n");
+        char* tmp = mdzfile_get_str(mf, "lu-mdz");
+        if (tmp) {
+            DMSG("tmp:%s\n", tmp);
+            if (strcmp(tmp, "(NULL)"))
+                last_used_set_file(LU_MDZ, tmp);
+            free(tmp);
+        }
+        if ((tmp = mdzfile_get_str(mf, "lu-png"))) {
+            DMSG("tmp:%s\n", tmp);
+            if (strcmp(tmp, "(NULL)"))
+                last_used_set_file(LU_PNG, tmp);
+            free(tmp);
+        }
+    }
+
     if (sect_flags & MDZ_FRACTAL_SETTINGS)
     {
         if (mdzfile_read(mf))
@@ -789,7 +816,10 @@ int image_info_load_all(image_info * img, int sect_flags, const char * fn)
         }
     }
 
-    last_used_set_file(LU_MDZ, fn);
+    if (!(mf->flags & MDZ_DUPLICATE)) {
+        last_used_set_file(LU_MDZ, fn);
+        last_used_reset_filename(LU_PNG);
+    }
 
     mdzfile_close(mf);
     return 1;

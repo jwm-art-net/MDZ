@@ -195,7 +195,7 @@ void duplicate(void)
         return;
     }
 
-    if (!image_info_f_save_all(img, fp))
+    if (!image_info_f_save_all(img, fp, MDZ_DUPLICATE))
     {
         fprintf(stderr, "Could not write settings to temp file\n");
         return;

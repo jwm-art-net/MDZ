@@ -14,6 +14,7 @@ typedef struct _last_used
     char* ext;
     char* filepath;
     char* suggested;
+    char* bd;
 } last_used;
 
 
@@ -60,15 +61,14 @@ static last_used*  _last_used_create(const char* ext)
 
 static void _last_used_free(last_used* lu)
 {
-    if (lu->basedir)
-        free(lu->basedir);
-    /* filename is basename() derived */
+    if (lu->bd)
+        free(lu->bd);
+    if (lu->filepath)
+        free(lu->filepath);
     if (lu->name)
         free(lu->name);
     if (lu->ext)
         free(lu->ext);
-    if (lu->filepath)
-        free(lu->filepath);
     if (lu->suggested)
         free(lu->suggested);
     free(lu);
@@ -98,27 +98,28 @@ void last_used_set_file(lu_type lt, const char* path)
 
     last_used* lu = _get_lu(lt);
 
-    if (lu->basedir && strcmp(lu->basedir, path) != 0) {
-        free(lu->basedir);
-        lu->basedir = 0;
-    }
-    if (!lu->basedir) {
-        lu->basedir = strdup(path);
-        lu->basedir = dirname(lu->basedir);
-    }
-    if (!lu->filename) {
-        lu->filepath = strdup(path);
-        lu->filename = basename(lu->filepath);
-        const char* dp = strrchr(lu->filename, '.');
-        if (!dp)
-            lu->name = strdup(lu->filename);
-        else {
-            size_t nl = dp - lu->filename;
-            lu->name = malloc(nl + 1);
-            strncpy(lu->name, lu->filename, nl);
-            *(lu->name + nl) = '\0';
-        }
-    }
+    if (lu->bd)
+        free(lu->bd);
+
+    lu->bd = strdup(path);
+    lu->basedir = dirname(lu->bd);
+
+    if (lu->filepath)
+        free(lu->filepath);
+
+    lu->filepath = strdup(path);
+    lu->filename = basename(lu->filepath);
+
+    if (lu->name)
+        free(lu->name);
+
+    lu->name = strdup(lu->filename);
+
+    char* dp = strrchr(lu->name, '.');
+
+    if (dp)
+        *dp = '\0';
+
     DMSG("lu->basedir: %s\n",lu->basedir);
     DMSG("lu->filename %s\n",lu->filename);
     DMSG("lu->name %s\n",lu->name);

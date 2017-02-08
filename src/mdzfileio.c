@@ -9,7 +9,8 @@
 #include "setting.h"
 
 
-static const char* mdzfile_header = "mdz fractal settings";
+const char* mdz_file_header = "mdz fractal settings";
+const char* mdz_dump_header = "mdz dump settings";
 
 
 static char* buf_tidy(const char* str)
@@ -107,14 +108,13 @@ int mdzfile_err(mdzfile* mf, const char* msg)
 mdzfile* mdzfile_read_open(const char* filename)
 {
     int i;
-    size_t hlen = strlen(mdzfile_header);
+    size_t hlen = strlen(mdz_file_header);
     char* version;
     FILE* f = fopen(filename, "r");
 
     if (!f)
     {
-        fprintf(stderr,
-                "Failed to open file '%s' for reading!\n",
+        fprintf(stderr, "Failed to open file '%s' for reading!\n",
                 filename);
         return 0;
     }
@@ -123,8 +123,7 @@ mdzfile* mdzfile_read_open(const char* filename)
 
     if (!mf)
     {
-        fprintf(stderr,
-                "Out of memory to read file '%s'!\n",
+        fprintf(stderr, "Out of memory to read file '%s'!\n",
                 filename);
         fclose(f);
         return 0;
@@ -135,8 +134,7 @@ mdzfile* mdzfile_read_open(const char* filename)
 
     if (!mf->name)
     {
-        fprintf(stderr,
-                "Out of memory to read file '%s'!\n",
+        fprintf(stderr, "Out of memory to read file '%s'!\n",
                 filename);
         free(mf);
         fclose(f);
@@ -152,14 +150,21 @@ mdzfile* mdzfile_read_open(const char* filename)
     mf->eof = false;
     mf->line = 0;
     mf->test = 0;
+    mf->flags = 0;
 
     if (!mdzfile_read(mf))
         return 0;
 
-    if (strncmp(mf->line, mdzfile_header, hlen))
+    if (strncmp(mf->line, mdz_file_header, hlen))
     {
-        mdzfile_err(mf, "not a recognisable mdz file\n");
-        return 0;
+        hlen = strlen(mdz_dump_header);
+        if (strncmp(mf->line, mdz_dump_header, hlen) == 0) {
+            mf->flags = 0 | MDZ_DUPLICATE;
+        }
+        else {
+            mdzfile_err(mf, "not a recognisable mdz file\n");
+            return 0;
+        }
     }
 
     version = mf->line + hlen;

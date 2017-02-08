@@ -15,6 +15,11 @@ enum /* mdz file section flags */
     MDZ_PALETTE_DATA =      0x0002
 };
 
+enum /* mdz_flags  */
+{
+    MDZ_NORMAL =    0x0000,
+    MDZ_DUPLICATE = 0x0001
+};
 
 struct mdzfile
 {
@@ -29,10 +34,14 @@ struct mdzfile
     int version_maj;
     int version_min;
     int version_rev;
+    int flags;
 };
 
-
 typedef struct mdzfile mdzfile;
+
+extern const char* mdz_file_header;
+extern const char* mdz_dump_header;
+
 
 mdzfile*    mdzfile_read_open(const char* filename);
 void        mdzfile_close(mdzfile*);

@@ -134,7 +134,7 @@ void    image_info_threads_change( image_info*, int thread_count);
 void    image_info_reset_view(      image_info*);
 void    get_center( image_info*,    mpfr_t x, mpfr_t y, mpfr_t mag);
 int     image_info_save_all(    image_info*,    const char* filename);
-int     image_info_f_save_all(  image_info*,    FILE* f);
+int     image_info_f_save_all(  image_info*,    FILE* f, int mdz_flags);
 
 /* see enum at top of mdzfileio.h for sect_flags */
 int image_info_load_all(    image_info*,    int sect_flags,
