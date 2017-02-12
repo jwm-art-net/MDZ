@@ -292,9 +292,12 @@ void image_info_reset_view(image_info* img)
     coords_reset(img->pcoords);
 
     img->ui_ref_center = TRUE;
+    /*
     last_used_reset_filename(LU_MDZ);
     last_used_reset_filename(LU_PNG);
+    */
 }
+
 
 int image_info_save_all(image_info * img, const char * filename)
 {

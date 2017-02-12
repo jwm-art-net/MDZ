@@ -1,3 +1,17 @@
+* check sanity of last used code, memory leaks, etc
+* check behaviour in response to files that fail to load
+* de-tangle when things are done
+* investigate interior colouring during antialiased image with interpolated colour map (it stops being black)
+* at deep zoom levels, crash can be caused by successive zoom-outs - i suspect it's not waiting for all threads to finish - or - worse - something more subtle.
+* save state - calculation data, partial renders, etc
+* undo state
+* remove threads setting from attributes dialog and make it changeable during render without restarting calculations 
+
+
+
+
+--------------
+
 Todo that I can do:
  * Button to pause-rendering.
  * Show render time.

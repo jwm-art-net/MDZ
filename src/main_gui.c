@@ -13,6 +13,7 @@
 #include "fractal.h"
 #include "fractset_gui.h"
 #include "image_info_gui.h"
+#include "last_used.h"
 #include "main.h"
 #include "misc_gui.h"
 #include "my_png.h"
@@ -402,6 +403,9 @@ static void do_fracset_dialog(void)
 static void do_reset_zoom(void)
 {
     image_info_reset_view(img);
+
+    last_used_reset_filename(LU_MDZ);
+    last_used_reset_filename(LU_PNG);
 
     gtk_spin_button_set_value((GtkSpinButton*)depth_spin, img->depth);
     gtk_check_menu_item_set_active(
