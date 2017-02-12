@@ -513,7 +513,7 @@ int do_image_info_load_dialog(image_info* img)
                         GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
                         NULL);
 
-    const char* lud = last_used_get_basedir(LU_MDZ);
+    const char* lud = last_used_suggest_dir(LU_MDZ);
     if (lud)
         gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dl), lud);
 

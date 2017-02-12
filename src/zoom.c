@@ -109,6 +109,7 @@ void zoom_out_func(GtkWidget* widget)
 {
     (void)widget;
     coords_zoom(img->pcoords,   2);
+    gui_stop_rendering(img);
     gui_start_rendering(img);
 }
 
@@ -182,6 +183,7 @@ void zoom_in(void)
     }
     else
     {
+        gui_stop_rendering(img);
         gui_start_rendering(img);
     }
 }
@@ -269,6 +271,6 @@ void zoom_gui_draw_zoom_box(void)
         FALSE,  stat.z_x - (stat.z_width >> 1),
                 stat.z_y - (stat.z_height >> 1),
                 stat.z_width, stat.z_height);
-    
+
     gdk_gc_set_function(drawing_area->style->white_gc, GDK_COPY);
 }

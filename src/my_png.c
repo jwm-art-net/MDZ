@@ -112,8 +112,6 @@ void do_png_save(image_info* img)
                         GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
                         NULL);
 
-    char* free_luf = 0;
-
     const char* lud = last_used_suggest_dir(LU_PNG);
 
     if (lud)
@@ -138,8 +136,7 @@ void do_png_save(image_info* img)
         last_used_set_file(LU_PNG, filename);
         g_free(filename);
     }
-    if (free_luf)
-        free(free_luf);
+
     gtk_widget_destroy (dialog);
 }
 

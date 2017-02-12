@@ -30,6 +30,6 @@ const char* last_used_suggest_filename(lu_type, const char* untitled_append);
 /* reset name/filename, but not dir/path */
 void        last_used_reset_filename(lu_type);
 
-
+int         last_used_basedir_changed(lu_type);
 #endif /* LAST_USED_H */
 

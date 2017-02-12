@@ -244,6 +244,11 @@ void palette_load_cmd(void)
         ++n;
     }
 
+    const char* lud = last_used_suggest_dir(LU_MAP);
+
+    if (lud)
+        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), lud);
+
     gui_file_chooser_add_filter(dialog, "MAP files", "*.map");
     gui_file_chooser_add_filter(dialog, "All files", "*");
 
@@ -267,6 +272,8 @@ void palette_load_cmd(void)
             }
             else
             {
+                last_used_set_file(LU_MAP, filename);
+
                 if (img->aa_factor == 1)
                     palette_apply(img, 0, 0,    img->user_width,
                                                 img->user_height);
@@ -301,12 +308,24 @@ void palette_save_cmd(void)
     gui_file_chooser_add_filter(dialog, "MAP files", "*.map");
     gui_file_chooser_add_filter(dialog, "All files", "*");
 
+    const char* lud = last_used_suggest_dir(LU_MAP);
+
+    if (lud)
+        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), lud);
+
+    const char* luf = last_used_suggest_filename(LU_MAP, NULL);
+
+    if (luf)
+        gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), luf);
+
+
     if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
     {
         char *filename;
         filename = gtk_file_chooser_get_filename(
                         GTK_FILE_CHOOSER(dialog));
-        palette_save(filename);
+        if (palette_save(filename))
+            last_used_set_file(LU_MAP, filename);
         g_free(filename);
     }
     gtk_widget_destroy (dialog);

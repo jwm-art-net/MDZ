@@ -6,9 +6,8 @@
 * save state - calculation data, partial renders, etc
 * undo state
 * remove threads setting from attributes dialog and make it changeable during render without restarting calculations 
-
-
-
+* ability to mark areas of interest ( ie with a rectangle, or line, maybe a circle )
+* time steps during colour cycling to determine if colour cycling should be stopped if it can't keep up.
 
 --------------
 

@@ -15,6 +15,7 @@ typedef struct _last_used
     char* filepath;
     char* suggested;
     char* bd;
+    int   basedir_changed;
 } last_used;
 
 
@@ -98,8 +99,8 @@ void last_used_set_file(lu_type lt, const char* path)
 
     last_used* lu = _get_lu(lt);
 
-    if (lu->bd)
-        free(lu->bd);
+    char* oldbd = lu->bd;
+    char* oldbasedir = lu->basedir;
 
     lu->bd = strdup(path);
     lu->basedir = dirname(lu->bd);
@@ -120,13 +121,19 @@ void last_used_set_file(lu_type lt, const char* path)
     if (dp)
         *dp = '\0';
 
+
+    if (oldbd) {
+        lu->basedir_changed = strcmp(oldbasedir, lu->basedir);
+        free(oldbd);
+    }
+
     DMSG("lu->basedir: %s\n",lu->basedir);
     DMSG("lu->filename %s\n",lu->filename);
     DMSG("lu->name %s\n",lu->name);
     DMSG("lu->ext %s\n",lu->ext);
     DMSG("lu->filepath %s\n",lu->filepath);
     DMSG("lu->suggested %s\n",lu->suggested);
-
+    DMSG("lu->basedir_changed %d\n", lu->basedir_changed);
 }
 
 
@@ -231,4 +238,8 @@ void last_used_reset_filename(lu_type lt)
     }
 }
 
+int last_used_basedir_changed(lu_type lt)
+{
+    return _get_lu(lt)->basedir_changed;
+}
 

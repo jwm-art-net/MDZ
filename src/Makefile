@@ -14,7 +14,7 @@ CFLAGS := $(DEFS) -O3 -fomit-frame-pointer -Winline -DNDEBUG
 
 #Other CFLAGS options:
 #CFLAGS := $(DEFS) -O3 -fomit-frame-pointer -Winline -DWITH_TMZ_CMDLINE
-CFLAGS := $(DEFS) -ggdb -DRTH_NDEBUG
+#CFLAGS := $(DEFS) -ggdb -DRTH_NDEBUG
 
 
 LIBS   := -lm -lpng -lz -lgmp -lmpfr -lpthread

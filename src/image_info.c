@@ -315,6 +315,8 @@ int image_info_save_all(image_info * img, const char * filename)
     }
     fclose(fd);
     last_used_set_file(LU_MDZ, filename);
+    if (last_used_basedir_changed(LU_MDZ))
+        last_used_set_file(LU_PNG, filename);
     return 1;
 }
 
@@ -821,7 +823,10 @@ int image_info_load_all(image_info * img, int sect_flags, const char * fn)
 
     if (!(mf->flags & MDZ_DUPLICATE)) {
         last_used_set_file(LU_MDZ, fn);
-        last_used_reset_filename(LU_PNG);
+        if (last_used_basedir_changed(LU_MDZ))
+            last_used_set_file(LU_PNG, fn);
+        else
+            last_used_reset_filename(LU_PNG);
     }
 
     mdzfile_close(mf);
